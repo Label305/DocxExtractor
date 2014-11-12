@@ -1,4 +1,4 @@
-DocxExtractor [![Build Status](https://travis-ci.org/Label305/DocxExtractor.svg)](https://travis-ci.org/Label305/DocxExtractor)
+Docx Extractor [![Build Status](https://travis-ci.org/Label305/DocxExtractor.svg)](https://travis-ci.org/Label305/DocxExtractor)
 =============
 
 PHP library for extracting and replacing string data in .docx files.
