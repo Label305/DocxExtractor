@@ -17,14 +17,21 @@ And execute the extractor to get a mapping. Write your changes to the mapping an
 
 ```php
 $extractor = new BasicExtractor();
-$mapping = $extractor->extractStringsAndCreateMappingFile('simple.docx', 'simple-extracted.docx');
+$mapping = $extractor->extractStringsAndCreateMappingFile(
+    'simple.docx',
+    'simple-extracted.docx'
+  );
 
 echo $mapping[0]; // The quick brown fox jumps over the lazy dog
 
 $mapping[0] = "Several fabulous dixieland jazz groups played with quick tempo.";
 
 $injector = new BasicInjector();
-$injector->injectMappingAndCreateNewFile($mapping, 'simple-extracted.docx', 'simple-injected.docx');
+$injector->injectMappingAndCreateNewFile(
+    $mapping,
+    'simple-extracted.docx',
+    'simple-injected.docx'
+  );
 ```
 
 License
