@@ -3,7 +3,7 @@ DocxExtractor [![Build Status](https://travis-ci.org/Label305/DocxExtractor.svg)
 
 PHP library for extracting and replacing string data in .docx files.
 
-Composer Installation
+Composer installation
 ---
 
 ```json
