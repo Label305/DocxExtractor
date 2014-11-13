@@ -14,6 +14,24 @@ abstract class DocxHandler {
     protected $temporaryDirectory = "/tmp";
 
     /**
+     * @return string
+     */
+    public function getTemporaryDirectory()
+    {
+        return $this->temporaryDirectory;
+    }
+
+    /**
+     * @param string $temporaryDirectory
+     * @return $this
+     */
+    public function setTemporaryDirectory($temporaryDirectory)
+    {
+        $this->temporaryDirectory = $temporaryDirectory;
+        return $this;
+    }
+
+    /**
      * Extract file
      * @param $fileHandle
      * @throws DocxFileException
