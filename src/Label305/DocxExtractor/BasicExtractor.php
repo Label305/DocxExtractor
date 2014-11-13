@@ -24,21 +24,10 @@ class BasicExtractor extends DocxHandler implements Extractor {
     {
         $prepared = $this->prepareDocumentForReading($originalFileHandle);
 
-        $documentXmlContents = file_get_contents($prepared["document"]);
-        $dom = new DOMDocument();
-        $loadXMLResult = $dom->loadXML($documentXmlContents, LIBXML_NOERROR | LIBXML_NOWARNING);
-
-        if (!$loadXMLResult || !($dom instanceof DOMDocument)) {
-            throw new DocxParsingException("Could not parse XML document");
-        }
-
         $this->nextTagIdentifier = 0;
-        $result = $this->replaceAndMapValues($dom->documentElement);
+        $result = $this->replaceAndMapValues($prepared['dom']->documentElement);
 
-        $newDocumentXMLContents = $dom->saveXml();
-        file_put_contents($prepared["document"], $newDocumentXMLContents);
-
-        $this->saveDocument($prepared["archive"], $mappingFileSaveLocationHandle);
+        $this->saveDocument($prepared['dom'], $prepared["archive"], $mappingFileSaveLocationHandle);
 
         return $result;
     }

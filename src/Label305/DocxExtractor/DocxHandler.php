@@ -1,6 +1,7 @@
 <?php namespace Label305\DocxExtractor;
 
 
+use DOMDocument;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ZipArchive;
@@ -16,8 +17,9 @@ abstract class DocxHandler {
      * Extract file
      * @param $fileHandle
      * @throws DocxFileException
-     * @returns array With "document" key and "archive" key both are paths, document points to the document.xml
-     * and archive points to the root of the archive.
+     * @throws DocxParsingException
+     * @returns array With "document" key, "dom" and "archive" key both are paths. "document" points to the document.xml
+     * and "archive" points to the root of the archive. "dom" is the DOMDocument object for the document.xml.
      */
     protected function prepareDocumentForReading($fileHandle)
     {
@@ -40,19 +42,34 @@ abstract class DocxHandler {
             throw new DocxFileException('Document.xml not found');
         }
 
+        $documentXmlContents = file_get_contents($document);
+        $dom = new DOMDocument();
+        $loadXMLResult = $dom->loadXML($documentXmlContents, LIBXML_NOERROR | LIBXML_NOWARNING);
+
+        if (!$loadXMLResult || !($dom instanceof DOMDocument)) {
+            throw new DocxParsingException("Could not parse XML document");
+        }
+
         return [
+            "dom" => $dom,
             "document" => $document,
             "archive" => $temp
         ];
     }
 
     /**
+     * @param $dom
      * @param $archiveLocation
      * @param $saveLocation
      * @throws DocxFileException
+     * @internal param $documentXMLLocation
      */
-    protected function saveDocument($archiveLocation, $saveLocation)
+    protected function saveDocument($dom, $archiveLocation, $saveLocation)
     {
+        $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
+        $newDocumentXMLContents = $dom->saveXml();
+        file_put_contents($documentXMLLocation, $newDocumentXMLContents);
+
         //Create a docx file again
         $zip = new ZipArchive;
 

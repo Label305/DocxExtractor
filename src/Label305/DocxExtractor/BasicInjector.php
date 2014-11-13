@@ -18,20 +18,9 @@ class BasicInjector extends DocxHandler implements Injector {
     {
         $prepared = $this->prepareDocumentForReading($fileToInjectLocationHandle);
 
-        $documentXmlContents = file_get_contents($prepared["document"]);
-        $dom = new DOMDocument();
-        $loadXMLResult = $dom->loadXML($documentXmlContents, LIBXML_NOERROR | LIBXML_NOWARNING);
+        $this->assignMappedValues($prepared['dom']->documentElement, $mapping);
 
-        if (!$loadXMLResult || !($dom instanceof DOMDocument)) {
-            throw new DocxParsingException("Could not parse XML document");
-        }
-
-        $this->assignMappedValues($dom->documentElement, $mapping);
-
-        $newDocumentXMLContents = $dom->saveXml();
-        file_put_contents($prepared["document"], $newDocumentXMLContents);
-
-        $this->saveDocument($prepared["archive"], $saveLocationHandle);
+        $this->saveDocument($prepared['dom'], $prepared["archive"], $saveLocationHandle);
     }
 
     /**
