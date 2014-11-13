@@ -22,9 +22,9 @@ class ExtractionTest extends TestCase {
 
         $this->assertEquals("Several fabulous dixieland jazz groups played with quick tempo.", $otherMapping[0]);
 
-//        unlink(__DIR__.'/fixtures/simple-extracted.docx');
-//        unlink(__DIR__.'/fixtures/simple-injected-extracted.docx');
-//        unlink(__DIR__.'/fixtures/simple-injected.docx');
+        unlink(__DIR__.'/fixtures/simple-extracted.docx');
+        unlink(__DIR__.'/fixtures/simple-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/simple-injected.docx');
     }
 
     public function testTagMappingBasicExtractorWithCrazyDocument() {
