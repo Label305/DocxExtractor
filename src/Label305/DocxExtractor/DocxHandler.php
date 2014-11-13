@@ -62,7 +62,6 @@ abstract class DocxHandler {
      * @param $archiveLocation
      * @param $saveLocation
      * @throws DocxFileException
-     * @internal param $documentXMLLocation
      */
     protected function saveDocument($dom, $archiveLocation, $saveLocation)
     {
