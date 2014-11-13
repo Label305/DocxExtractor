@@ -2,6 +2,7 @@
 
 use Label305\DocxExtractor\BasicExtractor;
 use Label305\DocxExtractor\BasicInjector;
+use Label305\DocxExtractor\DecoratedTextExtractor;
 
 class ExtractionTest extends TestCase {
 
@@ -31,9 +32,22 @@ class ExtractionTest extends TestCase {
 
         $extractor = new BasicExtractor();
 
-        $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
+        //var_dump($mapping);
 
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
+    }
+
+    public function testTagMappingDecoratedExtractorWithSimpleDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/simple.docx', __DIR__.'/fixtures/simple-extracted.docx');
+        //var_dump($mapping);
+
+        $this->assertEquals("The quick brown fox jumps over the lazy dog", $mapping["0-p"][0]["text"]);
+
+        unlink(__DIR__.'/fixtures/simple-extracted.docx');
     }
 
 }
