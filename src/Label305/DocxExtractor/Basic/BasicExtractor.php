@@ -1,9 +1,13 @@
-<?php namespace Label305\DocxExtractor;
+<?php namespace Label305\DocxExtractor\Basic;
 
 
 use DOMDocument;
 use DOMNode;
 use DOMText;
+use Label305\DocxExtractor\DocxFileException;
+use Label305\DocxExtractor\DocxHandler;
+use Label305\DocxExtractor\DocxParsingException;
+use Label305\DocxExtractor\Extractor;
 
 
 class BasicExtractor extends DocxHandler implements Extractor {

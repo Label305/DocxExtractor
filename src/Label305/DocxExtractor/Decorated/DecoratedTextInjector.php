@@ -1,10 +1,22 @@
-<?php namespace Label305\DocxExtractor;
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Thijs
+ * Date: 13-11-14
+ * Time: 11:46
+ */
 
-use DOMDocument;
+namespace Label305\DocxExtractor\Decorated;
+
+
 use DOMNode;
 use DOMText;
+use Label305\DocxExtractor\DocxFileException;
+use Label305\DocxExtractor\DocxHandler;
+use Label305\DocxExtractor\DocxParsingException;
+use Label305\DocxExtractor\Injector;
 
-class BasicInjector extends DocxHandler implements Injector {
+class DecoratedTextInjector extends DocxHandler implements Injector {
 
     /**
      * @param $mapping
@@ -25,7 +37,7 @@ class BasicInjector extends DocxHandler implements Injector {
 
     /**
      * @param DOMNode $node
-     * @param $mapping
+     * @param array $mapping should be a list of Paragraph objects
      */
     protected function assignMappedValues(DOMNode $node, $mapping)
     {
@@ -35,7 +47,19 @@ class BasicInjector extends DocxHandler implements Injector {
 
             if (count($results) > 0) {
                 $key = trim($results[0], '%');
-                $node->nodeValue = $mapping[$key];
+
+                $parent = $node->parentNode;
+
+                foreach ($mapping[$key] as $sentence) {
+
+                    $fragment = $parent->ownerDocument->createDocumentFragment();
+
+                    $fragment->appendXML($sentence->toDocxXML());
+
+                    $parent->insertBefore($fragment, $node);
+                }
+
+                $parent->removeChild($node);
             }
         }
 

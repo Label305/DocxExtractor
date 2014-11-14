@@ -6,12 +6,16 @@
  * Time: 09:45
  */
 
-namespace Label305\DocxExtractor;
+namespace Label305\DocxExtractor\Decorated;
 
 
 use DOMElement;
 use DOMNode;
 use DOMText;
+use Label305\DocxExtractor\DocxFileException;
+use Label305\DocxExtractor\DocxHandler;
+use Label305\DocxExtractor\DocxParsingException;
+use Label305\DocxExtractor\Extractor;
 
 class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
@@ -80,7 +84,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
             $firstTextChild = null;
             $otherNodes = [];
-            $parts = [];
+            $parts = new Paragraph();
 
             foreach ($paragraph->childNodes as $paragraphChild) {
                 if ($paragraphChild instanceof DOMElement && $paragraphChild->nodeName == "w:r") {
@@ -98,14 +102,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
             if ($firstTextChild !== null) {
                 $replacementNode = new DOMText();
-                $replacementNode->nodeValue = "%" . $this->nextTagIdentifier . "-p%";
+                $replacementNode->nodeValue = "%" . $this->nextTagIdentifier . "%";
                 $paragraph->replaceChild($replacementNode, $firstTextChild);
 
                 foreach ($otherNodes as $otherNode) {
                     $paragraph->removeChild($otherNode);
                 }
 
-                $result[$this->nextTagIdentifier . "-p"] = $parts;
+                $result[$this->nextTagIdentifier] = $parts;
                 $this->nextTagIdentifier++;
             }
         }
@@ -147,13 +151,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
         }
 
         if ($text != null) {
-            return [
-                "text" => $text,
-                "bold" => $bold,
-                "italic" => $italic,
-                "underline" => $underline,
-                "br_count" => $brCount
-            ];
+            return new Sentence($text, $bold, $italic, $underline, $brCount);
         } else {
             return null;
         }
