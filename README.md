@@ -43,6 +43,37 @@ $injector->injectMappingAndCreateNewFile(
   );
 ```
 
+Advanced usage
+----
+
+The library is also equiped with a `DecoratedTextExtractor` and `DecoratedTextInjector` with which you can manipulate basic paragraph styling like bold, italic and underline. You can also use the `Paragraph` objects to distinguish logical groupings of text.
+
+```php
+$extractor = new DecoratedTextExtractor();
+$mapping = $extractor->extractStringsAndCreateMappingFile(
+    'simple.docx',
+    'simple-extracted.docx'
+  );
+  
+$firstParagraph = $mapping[0]; // Paragraph object
+$firstSentence = $firstParagraph[0]; // Sentence object
+
+$firstSentence->italic = true;
+$firstSentence->bold = false;
+$firstSentence->underline = true;
+$firstSentence->br = 2; // Two line breaks before this sentence
+
+echo $firstSentence->text; // The quick brown fox jumps over the lazy dog
+$firstSentence->text = "Several fabulous dixieland jazz groups played with quick tempo.";
+
+$injector = new DecoratedTextInjector();
+$injector->injectMappingAndCreateNewFile(
+    $mapping,
+    'simple-extracted.docx',
+    'simple-injected.docx'
+  );
+```
+
 License
 ---------
 Copyright 2014 Label305 B.V.
