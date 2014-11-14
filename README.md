@@ -1,7 +1,7 @@
 Docx Extractor [![Build Status](https://travis-ci.org/Label305/DocxExtractor.svg)](https://travis-ci.org/Label305/DocxExtractor)
 =============
 
-PHP library for extracting and replacing string data in .docx files.
+PHP library for extracting and replacing string data in .docx files. Docx files are zip archives filled with XML documents and assets. Their format is described by [OOXML](http://nl.wikipedia.org/wiki/Office_Open_XML). This library only manipulates the `word/document.xml` file.
 
 Composer installation
 ---
@@ -18,8 +18,8 @@ Basic usage
 Import the basic classes.
 
 ```php
-use Label305\DocxExtractor\BasicExtractor;
-use Label305\DocxExtractor\BasicInjector;
+use Label305\DocxExtractor\Basic\BasicExtractor;
+use Label305\DocxExtractor\Basic\BasicInjector;
 ```
 
 And execute the extractor to get a mapping. Write your changes to the mapping and inject it back into the extracted file.
