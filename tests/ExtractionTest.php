@@ -62,4 +62,15 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/simple-injected.docx');
     }
 
+    public function testTagMappingDecoratedExtractorWithCrazyDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
+        var_dump($mapping);
+
+        unlink(__DIR__.'/fixtures/crazy-extracted.docx');
+    }
+
+
 }
