@@ -48,6 +48,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals("The quick brown fox jumps over the lazy dog", $mapping[0][0]->text);
 
         $mapping[0][0]->text = "Several fabulous dixieland jazz groups played with quick tempo.";
+        //var_dump($mapping[2]->toHTML());
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/simple-extracted.docx', __DIR__.'/fixtures/simple-injected.docx');
@@ -67,7 +68,7 @@ class ExtractionTest extends TestCase {
         $extractor = new DecoratedTextExtractor();
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
-        var_dump($mapping);
+        //var_dump($mapping);
 
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
     }

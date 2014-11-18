@@ -70,5 +70,65 @@ class Paragraph extends ArrayObject {
         }
     }
 
+    /**
+     * Give me a paragraph HTML
+     *
+     * @return string
+     */
+    public function toHTML()
+    {
+        $result = '';
+
+        $boldIsActive = false;
+        $italicIsActive = false;
+        $underlineIsActive = false;
+
+        for ($i = 0; $i < count($this); $i++) {
+
+            $sentence = $this[$i];
+
+            $openBold = false;
+            if ($sentence->bold && !$boldIsActive) {
+                $boldIsActive = true;
+                $openBold = true;
+            }
+
+            $openItalic = false;
+            if ($sentence->italic && !$italicIsActive) {
+                $italicIsActive = true;
+                $openItalic = true;
+            }
+
+            $openUnderline = false;
+            if ($sentence->underline && !$underlineIsActive) {
+                $underlineIsActive = true;
+                $openUnderline = true;
+            }
+
+            $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
+            $closeBold = false;
+            if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
+                $boldIsActive = false;
+                $closeBold = true;
+            }
+
+            $closeItalic = false;
+            if ($nextSentence === null || (!$nextSentence->italic && $italicIsActive)) {
+                $italicIsActive = false;
+                $closeItalic = true;
+            }
+
+            $closeUnderline = false;
+            if ($nextSentence === null || (!$nextSentence->underline && $underlineIsActive)) {
+                $underlineIsActive = false;
+                $closeUnderline = true;
+            }
+
+            $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $closeBold, $closeItalic, $closeUnderline);
+        }
+
+        return $result;
+    }
+
 
 }
