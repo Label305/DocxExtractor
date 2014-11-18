@@ -8,7 +8,7 @@ Composer installation
 
 ```json
 "require": {
-    "label305/docx-extractor": "0.1"
+    "label305/docx-extractor": "0.1.*"
 }
 ```
 
