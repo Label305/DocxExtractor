@@ -5,12 +5,12 @@ interface Injector {
 
     /**
      * @param $mapping
-     * @param $fileToInjectLocationHandle
-     * @param $saveLocationHandle
+     * @param $fileToInjectLocationPath
+     * @param $saveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
      * @return void
      */
-    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationHandle, $saveLocationHandle);
+    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationPath, $saveLocationPath);
 
 }

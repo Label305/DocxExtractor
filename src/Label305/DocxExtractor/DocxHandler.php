@@ -9,10 +9,20 @@ use ZipArchive;
 abstract class DocxHandler {
 
     /**
+     * Defaults to sys_get_temp_dir()
+     * 
      * @var string the tmp dir location
      */
-    protected $temporaryDirectory = "/tmp";
+    protected $temporaryDirectory;
 
+    /**
+     * Sets the temporary directory to the system
+     */
+    function __construct()
+    {
+        $this->setTemporaryDirectory(sys_get_temp_dir());
+    }
+    
     /**
      * @return string
      */
@@ -33,14 +43,17 @@ abstract class DocxHandler {
 
     /**
      * Extract file
-     * @param $fileHandle
+     * @param $filePath
      * @throws DocxFileException
      * @throws DocxParsingException
      * @returns array With "document" key, "dom" and "archive" key both are paths. "document" points to the document.xml
      * and "archive" points to the root of the archive. "dom" is the DOMDocument object for the document.xml.
      */
-    protected function prepareDocumentForReading($fileHandle)
+    protected function prepareDocumentForReading($filePath)
     {
+        //Make sure we have a complete and correct path
+        $filePath = realpath($filePath);
+        
         $temp = $this->temporaryDirectory . DIRECTORY_SEPARATOR . uniqid();
 
         if (file_exists($temp)) {
@@ -49,7 +62,7 @@ abstract class DocxHandler {
         mkdir($temp);
 
         $zip = new ZipArchive;
-        $zip->open($fileHandle);
+        $zip->open($filePath);
         $zip->extractTo($temp);
         $zip->close();
 
@@ -83,6 +96,10 @@ abstract class DocxHandler {
      */
     protected function saveDocument($dom, $archiveLocation, $saveLocation)
     {
+        if(!file_exists($archiveLocation)) {
+            throw new DocxFileException('Archive should exist: '. $archiveLocation);
+        }
+        
         $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
         $newDocumentXMLContents = $dom->saveXml();
         file_put_contents($documentXMLLocation, $newDocumentXMLContents);
@@ -90,8 +107,9 @@ abstract class DocxHandler {
         //Create a docx file again
         $zip = new ZipArchive;
 
-        if (!$zip->open($saveLocation, ZipArchive::OVERWRITE)) {
-            throw new DocxFileException('Cannot open zip: ' . $saveLocation);
+        $opened = $zip->open($saveLocation, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE);
+        if ($opened !== true) {
+            throw new DocxFileException('Cannot open zip: ' . $saveLocation . ' [' . $opened . ']');
         }
 
         // Create recursive directory iterator

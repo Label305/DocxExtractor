@@ -18,20 +18,21 @@ class BasicExtractor extends DocxHandler implements Extractor {
     protected $nextTagIdentifier;
 
     /**
-     * @param $originalFileHandle
-     * @param $mappingFileSaveLocationHandle
+     * @param $originalFilePath
+     * @param $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
      * @return Array The mapping of all the strings
      */
-    public function extractStringsAndCreateMappingFile($originalFileHandle, $mappingFileSaveLocationHandle)
+    public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath)
     {
-        $prepared = $this->prepareDocumentForReading($originalFileHandle);
+        
+        $prepared = $this->prepareDocumentForReading($originalFilePath);
 
         $this->nextTagIdentifier = 0;
         $result = $this->replaceAndMapValues($prepared['dom']->documentElement);
 
-        $this->saveDocument($prepared['dom'], $prepared["archive"], $mappingFileSaveLocationHandle);
+        $this->saveDocument($prepared['dom'], $prepared["archive"], $mappingFileSaveLocationPath);
 
         return $result;
     }

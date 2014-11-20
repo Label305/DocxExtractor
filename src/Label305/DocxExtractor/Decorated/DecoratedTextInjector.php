@@ -20,19 +20,19 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
 
     /**
      * @param $mapping
-     * @param $fileToInjectLocationHandle
-     * @param $saveLocationHandle
+     * @param $fileToInjectLocationPath
+     * @param $saveLocationPath
      * @throws DocxFileException
      * @throws DocxParsingException
      * @return void
      */
-    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationHandle, $saveLocationHandle)
+    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationPath, $saveLocationPath)
     {
-        $prepared = $this->prepareDocumentForReading($fileToInjectLocationHandle);
+        $prepared = $this->prepareDocumentForReading($fileToInjectLocationPath);
 
         $this->assignMappedValues($prepared['dom']->documentElement, $mapping);
 
-        $this->saveDocument($prepared['dom'], $prepared["archive"], $saveLocationHandle);
+        $this->saveDocument($prepared['dom'], $prepared["archive"], $saveLocationPath);
     }
 
     /**
