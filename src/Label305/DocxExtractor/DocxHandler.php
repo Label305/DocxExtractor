@@ -52,7 +52,7 @@ abstract class DocxHandler {
     protected function prepareDocumentForReading($filePath)
     {
         //Make sure we have a complete and correct path
-        $filePath = realpath($filePath);
+        $filePath = realpath($filePath) :? $filePath;
         
         $temp = $this->temporaryDirectory . DIRECTORY_SEPARATOR . uniqid();
 
