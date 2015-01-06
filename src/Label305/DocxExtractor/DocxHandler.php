@@ -64,7 +64,7 @@ abstract class DocxHandler {
         $zip = new ZipArchive;
         $opened = $zip->open($filePath)
         if ($opened !== TRUE) {
-            throw new DocxFileException('Could not open zip archive (' . $opened . ')');
+            throw new DocxFileException( 'Could not open zip archive [' . $opened . ']' );
         }
         $zip->extractTo($temp);
         $zip->close();
@@ -73,7 +73,7 @@ abstract class DocxHandler {
         $document = $temp . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
 
         if (!file_exists($document)) {
-            throw new DocxFileException('Document.xml not found');
+            throw new DocxFileException( 'Document.xml not found' );
         }
 
         $documentXmlContents = file_get_contents($document);
@@ -81,7 +81,7 @@ abstract class DocxHandler {
         $loadXMLResult = $dom->loadXML($documentXmlContents, LIBXML_NOERROR | LIBXML_NOWARNING);
 
         if (!$loadXMLResult || !($dom instanceof DOMDocument)) {
-            throw new DocxParsingException("Could not parse XML document");
+            throw new DocxParsingException( 'Could not parse XML document' );
         }
 
         return [
@@ -100,7 +100,7 @@ abstract class DocxHandler {
     protected function saveDocument($dom, $archiveLocation, $saveLocation)
     {
         if(!file_exists($archiveLocation)) {
-            throw new DocxFileException('Archive should exist: '. $archiveLocation);
+            throw new DocxFileException( 'Archive should exist: '. $archiveLocation );
         }
 
         $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
@@ -112,7 +112,7 @@ abstract class DocxHandler {
 
         $opened = $zip->open($saveLocation, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE);
         if ($opened !== true) {
-            throw new DocxFileException('Cannot open zip: ' . $saveLocation . ' [' . $opened . ']');
+            throw new DocxFileException( 'Cannot open zip: ' . $saveLocation . ' [' . $opened . ']' );
         }
 
         // Create recursive directory iterator
@@ -127,19 +127,19 @@ abstract class DocxHandler {
             }
 
             if (!file_exists($filePath)) {
-                throw new DocxFileException('File does not exists: ' . $file->getPathname() . PHP_EOL);
+                throw new DocxFileException( 'File does not exists: ' . $file->getPathname() );
             } else {
                 if (!is_readable($filePath)) {
-                    throw new DocxFileException('File is not readable: ' . $file->getPathname());
+                    throw new DocxFileException( 'File is not readable: ' . $file->getPathname() );
                 } else {
                     if (!$zip->addFile($filePath, substr($file->getPathname(), strlen($archiveLocation) + 1))) {
-                        throw new DocxFileException('Error adding file: ' . $file->getPathname());
+                        throw new DocxFileException( 'Error adding file: ' . $file->getPathname() );
                     }
                 }
             }
         }
         if (!$zip->close()) {
-            throw new DocxFileException('Could not create zip file');
+            throw new DocxFileException( 'Could not create zip file' );
         }
     }
 
