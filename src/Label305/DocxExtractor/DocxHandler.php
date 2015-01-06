@@ -10,7 +10,7 @@ abstract class DocxHandler {
 
     /**
      * Defaults to sys_get_temp_dir()
-     * 
+     *
      * @var string the tmp dir location
      */
     protected $temporaryDirectory;
@@ -22,7 +22,7 @@ abstract class DocxHandler {
     {
         $this->setTemporaryDirectory(sys_get_temp_dir());
     }
-    
+
     /**
      * @return string
      */
@@ -53,7 +53,7 @@ abstract class DocxHandler {
     {
         //Make sure we have a complete and correct path
         $filePath = realpath($filePath) ?: $filePath;
-        
+
         $temp = $this->temporaryDirectory . DIRECTORY_SEPARATOR . uniqid();
 
         if (file_exists($temp)) {
@@ -62,7 +62,10 @@ abstract class DocxHandler {
         mkdir($temp);
 
         $zip = new ZipArchive;
-        $zip->open($filePath);
+        $opened = $zip->open($filePath)
+        if ($opened !== TRUE) {
+            throw new DocxFileException('Could not open zip archive (' . $opened . ')');
+        }
         $zip->extractTo($temp);
         $zip->close();
 
@@ -99,7 +102,7 @@ abstract class DocxHandler {
         if(!file_exists($archiveLocation)) {
             throw new DocxFileException('Archive should exist: '. $archiveLocation);
         }
-        
+
         $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
         $newDocumentXMLContents = $dom->saveXml();
         file_put_contents($documentXMLLocation, $newDocumentXMLContents);
