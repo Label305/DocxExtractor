@@ -62,7 +62,7 @@ abstract class DocxHandler {
         mkdir($temp);
 
         $zip = new ZipArchive;
-        $opened = $zip->open($filePath)
+        $opened = $zip->open($filePath);
         if ($opened !== TRUE) {
             throw new DocxFileException( 'Could not open zip archive [' . $opened . ']' );
         }
