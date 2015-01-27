@@ -142,7 +142,12 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             }
 
             if ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
-                $text = implode($this->parseText($rChild));
+                if ($rChild->getAttribute("xml:space") == 'preserve') {
+                    $text = implode($this->parseText($rChild));
+                } else {
+                    $text = trim(implode($this->parseText($rChild)), " ");
+                }
+
             }
 
             if ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {

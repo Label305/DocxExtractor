@@ -57,7 +57,7 @@ class Sentence {
             $value .= "<w:i/>";
         }
         if ($this->underline) {
-            $value .= "<w:i/>";
+            $value .= '<w:u w:val="single"/>';
         }
 
         $value .= "</w:rPr>";
@@ -66,7 +66,7 @@ class Sentence {
             $value .= "<w:br/>";
         }
 
-        $value .= "<w:t>" . htmlentities($this->text) . "</w:t></w:r>";
+        $value .= '<w:t xml:space="preserve">' . htmlentities($this->text) . "</w:t></w:r>";
 
         return $value;
     }

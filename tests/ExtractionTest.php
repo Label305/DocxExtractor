@@ -63,6 +63,32 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/simple-injected.docx');
     }
 
+    public function testTagMappingDecoratedExtractorWithNormalDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal.docx', __DIR__.'/fixtures/normal-extracted.docx');
+
+        $this->assertEquals("Aan", $mapping[0][0]->text);
+
+        $mapping[0][0]->text = "At";
+        $mapping[0][1]->text = "The";
+        $mapping[0][2]->text = "Edge";
+        //var_dump($mapping[2]->toHTML());
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/normal-extracted.docx', __DIR__.'/fixtures/normal-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal-injected.docx', __DIR__.'/fixtures/normal-injected-extracted.docx');
+
+        $this->assertEquals("At", $otherMapping[0][0]->text);
+
+        unlink(__DIR__.'/fixtures/normal-extracted.docx');
+        unlink(__DIR__.'/fixtures/normal-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/normal-injected.docx');
+    }
+
     public function testTagMappingDecoratedExtractorWithCrazyDocument() {
 
         $extractor = new DecoratedTextExtractor();
