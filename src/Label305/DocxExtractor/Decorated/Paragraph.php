@@ -17,7 +17,8 @@ class Paragraph extends ArrayObject {
     /**
      * Conenience constructor for the user of the API
      * Strings with <br> <b> <i> and <u> tags are supported.
-     * @param $html
+     * @param $html string
+     * @return Paragraph
      */
     public static function paragraphWithHTML($html)
     {
@@ -27,6 +28,7 @@ class Paragraph extends ArrayObject {
 
         $paragraph = new Paragraph();
         $paragraph->fillWithHTMLDom($htmlDom->documentElement);
+        return $paragraph;
     }
 
     /**
