@@ -23,6 +23,7 @@ class Paragraph extends ArrayObject {
     public static function paragraphWithHTML($html)
     {
         $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u>') . "</html>";
+        $html = str_replace("<br>", "<br />", $html);
         $htmlDom = new DOMDocument;
         $htmlDom->loadXml($html);
 
