@@ -24,6 +24,7 @@ class Paragraph extends ArrayObject {
     {
         $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u>') . "</html>";
         $html = str_replace("<br>", "<br />", $html);
+        $html = str_replace("&nbsp;", " ", $html);
         $htmlDom = new DOMDocument;
         $htmlDom->loadXml($html);
 
