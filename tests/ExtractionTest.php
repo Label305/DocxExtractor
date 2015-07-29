@@ -4,6 +4,7 @@ use Label305\DocxExtractor\Basic\BasicExtractor;
 use Label305\DocxExtractor\Basic\BasicInjector;
 use Label305\DocxExtractor\Decorated\DecoratedTextExtractor;
 use Label305\DocxExtractor\Decorated\DecoratedTextInjector;
+use Label305\DocxExtractor\Decorated\Paragraph;
 
 class ExtractionTest extends TestCase {
 
@@ -97,6 +98,34 @@ class ExtractionTest extends TestCase {
         //var_dump($mapping);
 
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
+    }
+
+    public function testTagMappingDecoratedExtractorWithNormalDocumentContainingNbsp() {
+
+        $extractor = new DecoratedTextExtractor();
+
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal.docx', __DIR__.'/fixtures/normal-extracted.docx');
+
+        $this->assertEquals("Aan", $mapping[0][0]->text);
+
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("At&nbsp;")->toHTML();
+        $mapping[0][1]->text = Paragraph::paragraphWithHTML("The&nbsp;")->toHTML();
+        $mapping[0][2]->text = "Edge";
+        //var_dump($mapping[0]->toHTML());
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/normal-extracted.docx', __DIR__.'/fixtures/normal-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal-injected.docx', __DIR__.'/fixtures/normal-injected-extracted.docx');
+
+        $this->assertEquals("At ", $otherMapping[0][0]->text);
+        $this->assertEquals("The ", $otherMapping[0][1]->text);
+        $this->assertEquals("Edge", $otherMapping[0][2]->text);
+
+        unlink(__DIR__.'/fixtures/normal-extracted.docx');
+        unlink(__DIR__.'/fixtures/normal-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/normal-injected.docx');
     }
 
 
