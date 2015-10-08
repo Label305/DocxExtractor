@@ -66,7 +66,7 @@ class Sentence {
             $value .= "<w:br/>";
         }
 
-        $value .= '<w:t xml:space="preserve">' . htmlentities($this->text) . "</w:t></w:r>";
+        $value .= '<w:t xml:space="preserve">' . htmlentities($this->text, ENT_XML1) . "</w:t></w:r>";
 
         return $value;
     }
