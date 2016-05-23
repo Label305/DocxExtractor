@@ -100,7 +100,7 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
     }
 
-    public function testTagMappingDecoratedExtractorWithNormalDocumentContainingNbsp() {
+    public function testTagMappingDecoratedExtractorWithNormalDocumentContainingNbspOrTilde() {
 
         $extractor = new DecoratedTextExtractor();
 
@@ -111,7 +111,7 @@ class ExtractionTest extends TestCase {
         $mapping[0][0]->text = Paragraph::paragraphWithHTML("At&nbsp;")->toHTML();
         $mapping[0][1]->text = Paragraph::paragraphWithHTML("The&nbsp;")->toHTML();
         $mapping[0][2]->text = "Edge";
-        //var_dump($mapping[0]->toHTML());
+        $mapping[0][3]->text = Paragraph::paragraphWithHTML("&Atilde;")->toHTML();
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/normal-extracted.docx', __DIR__.'/fixtures/normal-injected.docx');
@@ -122,6 +122,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals("At ", $otherMapping[0][0]->text);
         $this->assertEquals("The ", $otherMapping[0][1]->text);
         $this->assertEquals("Edge", $otherMapping[0][2]->text);
+        $this->assertEquals("&Atilde;", $otherMapping[0][3]->text);
 
         unlink(__DIR__.'/fixtures/normal-extracted.docx');
         unlink(__DIR__.'/fixtures/normal-injected-extracted.docx');
