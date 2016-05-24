@@ -3,3 +3,6 @@ php:
 - 5.4
 
 install: composer install
+
+notifications:
+  email: false
