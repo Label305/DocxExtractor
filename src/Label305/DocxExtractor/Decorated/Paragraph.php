@@ -26,7 +26,7 @@ class Paragraph extends ArrayObject {
         $html = str_replace("<br>", "<br />", $html);
         $html = str_replace("&nbsp;", " ", $html);
         $htmlDom = new DOMDocument;
-        $htmlDom->loadXml($html);
+        $htmlDom->loadXml(preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', html_entity_decode($html)));
 
         $paragraph = new Paragraph();
         $paragraph->fillWithHTMLDom($htmlDom->documentElement);
