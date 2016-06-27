@@ -6,3 +6,4 @@ install: composer install
 
 notifications:
   email: false
+  slack: label305:wrsrU02XRIn0hHmNHrLqGFk2
