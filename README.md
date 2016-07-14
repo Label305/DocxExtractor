@@ -34,13 +34,13 @@ $mapping = $extractor->extractStringsAndCreateMappingFile(
 
 Now that you have extracted paragraphs you can inspect the content of the resulting `$mapping` array. And if you wish to change the content you can simply modify it. The array key maps to a symbol in the `simple-extracted.docx`.
 
-```
+```php
 echo $mapping[0]; // The quick brown fox jumps over the lazy dog
 ```
 
 Now after you changed your content, you can save it back to a new file. In this case that file is `simple-injected.docx`.
 
-```
+```php
 $mapping[0] = "Several fabulous dixieland jazz groups played with quick tempo.";
 
 $injector = new BasicInjector();
