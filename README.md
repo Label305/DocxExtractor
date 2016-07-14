@@ -22,7 +22,7 @@ use Label305\DocxExtractor\Basic\BasicExtractor;
 use Label305\DocxExtractor\Basic\BasicInjector;
 ```
 
-And execute the extractor to get a mapping. Write your changes to the mapping and inject it back into the extracted file.
+First we need to extract all the paragraphs from an existing `docx` file. This can be done using the `BasicExtractor` or the `DecoratedTextExtractor`. Calling `extractStringsAndCreateMappingFile` will create a new file which name you pass in the second argument. This new file contains references so the library knows where to later inject the altered text back into.
 
 ```php
 $extractor = new BasicExtractor();
@@ -30,9 +30,17 @@ $mapping = $extractor->extractStringsAndCreateMappingFile(
     'simple.docx',
     'simple-extracted.docx'
   );
+```
 
+Now that you have extracted paragraphs you can inspect the content of the resulting `$mapping` array. And if you wish to change the content you can simply modify it. The array key maps to a symbol in the `simple-extracted.docx`.
+
+```
 echo $mapping[0]; // The quick brown fox jumps over the lazy dog
+```
 
+Now after you changed your content, you can save it back to a new file. In this case that file is `simple-injected.docx`.
+
+```
 $mapping[0] = "Several fabulous dixieland jazz groups played with quick tempo.";
 
 $injector = new BasicInjector();
