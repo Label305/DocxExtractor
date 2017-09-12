@@ -83,6 +83,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             $nodeNames = [
                 "w:r",
                 "w:hyperlink",
+                "w:smartTag",
             ];
 
             foreach ($paragraph->childNodes as $paragraphChild) {
@@ -127,7 +128,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
         foreach ($rNode->childNodes as $rChild) {
 
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:r") {
+            if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
                 foreach ($rChild->childNodes as $propertyNode) {
                     if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
                         $text = trim(implode($this->parseText($rChild)), " ");
@@ -136,7 +137,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
                     }
                 }
             }
-
+            
             elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
                 foreach ($rChild->childNodes as $propertyNode) {
                     if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
