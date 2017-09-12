@@ -129,5 +129,36 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/normal-injected.docx');
     }
 
+    public function testTagMappingDecoratedExtractorWithDocumentContainingHyperlink() {
+
+        $extractor = new DecoratedTextExtractor();
+
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlink.docx', __DIR__.'/fixtures/hyperlink-extracted.docx');
+
+        $this->assertEquals("Bent u geïnteresseerd in een nieuw gebouwde ruime woning vanaf Euro ", $mapping[0][0]->text);
+        $this->assertEquals("69.000,–", $mapping[0][1]->text);
+        $this->assertEquals("? ", $mapping[0][2]->text);
+        $this->assertEquals("KLIK OP DEZE LINK EN ZIE UW NIEUW GEBOUWDE WONING.", $mapping[0][3]->text);
+
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("Are you interested in a newly built spacious house from Euro&nbsp;")->toHTML();
+        $mapping[0][1]->text = Paragraph::paragraphWithHTML("69.000,&ndash;")->toHTML();
+        $mapping[0][2]->text = "? ";
+        $mapping[0][3]->text = Paragraph::paragraphWithHTML("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.")->toHTML();
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlink-extracted.docx', __DIR__.'/fixtures/hyperlink-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlink-injected.docx', __DIR__.'/fixtures/hyperlink-injected-extracted.docx');
+
+        $this->assertEquals("Are you interested in a newly built spacious house from Euro ", $otherMapping[0][0]->text);
+        $this->assertEquals("69.000,&ndash;", $otherMapping[0][1]->text);
+        $this->assertEquals("? ", $otherMapping[0][2]->text);
+        $this->assertEquals("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.", $otherMapping[0][3]->text);
+
+        unlink(__DIR__.'/fixtures/hyperlink-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlink-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlink-injected.docx');
+    }
 
 }

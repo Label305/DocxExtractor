@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Thijs
- * Date: 13-11-14
- * Time: 09:45
- */
 
 namespace Label305\DocxExtractor\Decorated;
 
@@ -86,8 +80,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             $otherNodes = [];
             $parts = new Paragraph();
 
+            $nodeNames = [
+                "w:r",
+                "w:hyperlink",
+            ];
+
             foreach ($paragraph->childNodes as $paragraphChild) {
-                if ($paragraphChild instanceof DOMElement && $paragraphChild->nodeName == "w:r") {
+                if ($paragraphChild instanceof DOMElement && in_array($paragraphChild->nodeName, $nodeNames)) {
+
                     $paragraphPart = $this->parseRNode($paragraphChild);
                     if ($paragraphPart !== null) {
                         $parts[] = $paragraphPart;
@@ -127,21 +127,31 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
         foreach ($rNode->childNodes as $rChild) {
 
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
+            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:r") {
+                foreach ($rChild->childNodes as $propertyNode) {
+                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
+                        $text = trim(implode($this->parseText($rChild)), " ");
+                    } else {
+                        $text = trim(implode($this->parseText($rChild)), " ");
+                    }
+                }
+            }
+
+            elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
                 foreach ($rChild->childNodes as $propertyNode) {
                     if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
                         $bold = true;
                     }
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
+                    elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
                         $italic = true;
                     }
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
+                    elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
                         $underline = true;
                     }
                 }
             }
 
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
+            elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
                 if ($rChild->getAttribute("xml:space") == 'preserve') {
                     $text = implode($this->parseText($rChild));
                 } else {
@@ -150,7 +160,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
 
             }
 
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
+            elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
                 $brCount++;
             }
         }
