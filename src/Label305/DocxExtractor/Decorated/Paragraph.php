@@ -22,7 +22,7 @@ class Paragraph extends ArrayObject {
      */
     public static function paragraphWithHTML($html)
     {
-        $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u>') . "</html>";
+        $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u><mark><sub><sup>') . "</html>";
         $html = str_replace("<br>", "<br />", $html);
         $html = str_replace("&nbsp;", " ", $html);
         $htmlDom = new DOMDocument;
@@ -44,12 +44,13 @@ class Paragraph extends ArrayObject {
      * @param bool $bold
      * @param bool $italic
      * @param bool $underline
+     * @param bool $highlight
      */
-    public function fillWithHTMLDom(DOMNode $node, $br = 0, $bold = false, $italic = false, $underline = false)
+    public function fillWithHTMLDom(DOMNode $node, $br = 0, $bold = false, $italic = false, $underline = false, $highlight = false)
     {
         if ($node instanceof DOMText) {
 
-            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br);
+            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight);
 
         } else if ($node->childNodes !== null) {
 
@@ -65,12 +66,16 @@ class Paragraph extends ArrayObject {
                 $underline = true;
             }
 
+            if ($node->nodeName == 'mark') {
+                $highlight = true;
+            }
+
             foreach ($node->childNodes as $child) {
 
                 if ($child->nodeName == 'br') {
                     $br++;
                 } else {
-                    $this->fillWithHTMLDom($child, $br, $bold, $italic, $underline);
+                    $this->fillWithHTMLDom($child, $br, $bold, $italic, $underline, $highlight);
                     $br = 0;
                 }
             }
@@ -89,6 +94,7 @@ class Paragraph extends ArrayObject {
         $boldIsActive = false;
         $italicIsActive = false;
         $underlineIsActive = false;
+        $highlightActive = false;
 
         for ($i = 0; $i < count($this); $i++) {
 
@@ -112,6 +118,12 @@ class Paragraph extends ArrayObject {
                 $openUnderline = true;
             }
 
+            $openHighlight = false;
+            if ($sentence->highlight && !$highlightActive) {
+                $highlightActive = true;
+                $openHighlight = true;
+            }
+
             $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
             $closeBold = false;
             if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
@@ -131,7 +143,13 @@ class Paragraph extends ArrayObject {
                 $closeUnderline = true;
             }
 
-            $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $closeBold, $closeItalic, $closeUnderline);
+            $closeHighlight = false;
+            if ($nextSentence === null || (!$nextSentence->highlight && $highlightActive)) {
+                $highlightActive = false;
+                $closeHighlight = true;
+            }
+
+            $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $closeBold, $closeItalic, $closeUnderline, $closeHighlight);
         }
 
         return $result;

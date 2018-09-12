@@ -28,23 +28,29 @@ class Sentence {
     public $underline;
 
     /**
+     * @var bool If sentence is highlighted or not
+     */
+    public $highlight;
+
+    /**
      * @var int Number of line breaks
      */
     public $br;
 
-    function __construct($text, $bold, $italic, $underline, $br)
+    function __construct($text, $bold, $italic, $underline, $br, $highlight)
     {
         $this->text = $text;
         $this->bold = $bold;
         $this->italic = $italic;
         $this->underline = $underline;
         $this->br = $br;
+        $this->highlight = $highlight;
     }
 
     /**
      * To docx xml string
      *
-     * @return sting
+     * @return string
      */
     public function toDocxXML()
     {
@@ -58,6 +64,9 @@ class Sentence {
         }
         if ($this->underline) {
             $value .= '<w:u w:val="single"/>';
+        }
+        if ($this->highlight) {
+            $value .= '<w:highlight w:val="yellow"/>';
         }
 
         $value .= "</w:rPr>";
@@ -83,10 +92,20 @@ class Sentence {
      * @param bool $lastWrappedInBold
      * @param bool $lastWrappedInItalic
      * @param bool $lastWrappedInUnderline
+     * @param bool $firstWrappedInHighlight
+     * @param bool $lastWrappedInHighlight
      * @return string HTML string
      */
-    public function toHTML($firstWrappedInBold = true, $firstWrappedInItalic = true, $firstWrappedInUnderline = true,
-                           $lastWrappedInBold = true, $lastWrappedInItalic = true, $lastWrappedInUnderline = true)
+    public function toHTML(
+        $firstWrappedInBold = true,
+        $firstWrappedInItalic = true,
+        $firstWrappedInUnderline = true,
+        $firstWrappedInHighlight = true,
+        $lastWrappedInBold = true,
+        $lastWrappedInItalic = true,
+        $lastWrappedInUnderline = true,
+        $lastWrappedInHighlight = true
+    )
     {
         $value = '';
 
@@ -94,6 +113,9 @@ class Sentence {
             $value .= "<br />";
         }
 
+        if ($this->highlight && $firstWrappedInHighlight) {
+            $value .= "<mark>";
+        }
         if ($this->bold && $firstWrappedInBold) {
             $value .= "<strong>";
         }
@@ -114,6 +136,9 @@ class Sentence {
         }
         if ($this->bold && $lastWrappedInBold) {
             $value .= "</strong>";
+        }
+        if ($this->highlight && $lastWrappedInHighlight) {
+            $value .= "</mark>";
         }
 
         return $value;

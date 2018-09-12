@@ -36,7 +36,27 @@ class ExtractionTest extends TestCase {
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
 
+        $this->assertEquals("Haynes-Shockley experiment", $mapping[0]);
+        $this->assertEquals("Practical work P3, solid state physics", $mapping[1]);
+        $this->assertEquals("Introduction", $mapping[2]);
+
+        $mapping[0] = "Haynes-Shockley experiment updated";
+        $mapping[1] = "Practical work P3, solid state physics updated";
+        $mapping[2] = "Introduction updated";
+
+        $injector = new BasicInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/crazy-extracted.docx', __DIR__.'/fixtures/crazy-injected.docx');
+
+        $otherExtractor = new BasicExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy-injected.docx', __DIR__.'/fixtures/crazy-injected-extracted.docx');
+
+        $this->assertEquals("Haynes-Shockley experiment updated", $otherMapping[0]);
+        $this->assertEquals("Practical work P3, solid state physics updated", $otherMapping[1]);
+        $this->assertEquals("Introduction updated", $otherMapping[2]);
+
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
+        unlink(__DIR__.'/fixtures/crazy-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/crazy-injected.docx');
     }
 
     public function testTagMappingDecoratedExtractorWithSimpleDocument() {
@@ -194,6 +214,56 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/smart_tag-extracted.docx');
         unlink(__DIR__.'/fixtures/smart_tag-injected-extracted.docx');
         unlink(__DIR__.'/fixtures/smart_tag-injected.docx');
+    }
+
+    public function testCrazyHyperlinksInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy_hyperlinks.docx', __DIR__.'/fixtures/crazy_hyperlinks-extracted.docx');
+
+        $this->assertEquals("Meer weten over deze doopsuikerdoosjes", $mapping[9][0]->text); // This is a link
+
+        $mapping[9][0]->text = "Link vertaald";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/crazy_hyperlinks-extracted.docx', __DIR__.'/fixtures/crazy_hyperlinks-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy_hyperlinks-injected.docx', __DIR__.'/fixtures/crazy_hyperlinks-injected-extracted.docx');
+
+        $this->assertEquals("Link vertaald", $otherMapping[9][0]->text);
+
+        unlink(__DIR__.'/fixtures/crazy_hyperlinks-extracted.docx');
+        unlink(__DIR__.'/fixtures/crazy_hyperlinks-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/crazy_hyperlinks-injected.docx');
+    }
+
+    public function testMarkingsInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/markings.docx', __DIR__.'/fixtures/markings-extracted.docx');
+
+        $this->assertEquals("Energie gebruik ", $mapping[53][2]->text); // This is highlight
+        $this->assertEquals("volgens leveranciers opgave ", $mapping[53][3]->text); // This is highlight
+        $this->assertEquals("van A-merk", $mapping[53][4]->text); // This is highlight
+
+        $mapping[53][2]->text = "Dit is ";
+        $mapping[53][3]->text = "het vertaalde ";
+        $mapping[53][4]->text = "stuk tekst";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/markings-extracted.docx', __DIR__.'/fixtures/markings-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/markings-injected.docx', __DIR__.'/fixtures/markings-injected-extracted.docx');
+
+        $this->assertEquals("Dit is ", $otherMapping[53][2]->text);
+        $this->assertEquals("het vertaalde ", $otherMapping[53][3]->text);
+        $this->assertEquals("stuk tekst", $otherMapping[53][4]->text);
+
+        unlink(__DIR__.'/fixtures/markings-extracted.docx');
+        unlink(__DIR__.'/fixtures/markings-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/markings-injected.docx');
     }
 
 }
