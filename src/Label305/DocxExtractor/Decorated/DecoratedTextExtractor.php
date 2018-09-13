@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Thijs
- * Date: 13-11-14
- * Time: 09:45
- */
 
 namespace Label305\DocxExtractor\Decorated;
 
@@ -17,7 +11,8 @@ use Label305\DocxExtractor\DocxHandler;
 use Label305\DocxExtractor\DocxParsingException;
 use Label305\DocxExtractor\Extractor;
 
-class DecoratedTextExtractor extends DocxHandler implements Extractor {
+class DecoratedTextExtractor extends DocxHandler implements Extractor
+{
 
     /**
      * @var int
@@ -29,7 +24,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
      * @param $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
-     * @return Array The mapping of all the strings
+     * @return array The mapping of all the strings
      */
     public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath)
     {
@@ -86,8 +81,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
             $otherNodes = [];
             $parts = new Paragraph();
 
+            $nodeNames = [
+                "w:r",
+                "w:hyperlink",
+                "w:smartTag"
+            ];
+
             foreach ($paragraph->childNodes as $paragraphChild) {
-                if ($paragraphChild instanceof DOMElement && $paragraphChild->nodeName == "w:r") {
+                if ($paragraphChild instanceof DOMElement && in_array($paragraphChild->nodeName, $nodeNames)) {
                     $paragraphPart = $this->parseRNode($paragraphChild);
                     if ($paragraphPart !== null) {
                         $parts[] = $paragraphPart;
@@ -123,40 +124,45 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor {
         $italic = false;
         $underline = false;
         $brCount = 0;
+        $highLight = false;
         $text = null;
 
         foreach ($rNode->childNodes as $rChild) {
 
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
+            if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
+                foreach ($rChild->childNodes as $propertyNode) {
+                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
+                        $text = trim(implode($this->parseText($rChild)), " ");
+                    } else {
+                        $text = trim(implode($this->parseText($rChild)), " ");
+                    }
+                }
+            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
                 foreach ($rChild->childNodes as $propertyNode) {
                     if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
                         $bold = true;
-                    }
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
+                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
                         $italic = true;
-                    }
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
+                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
                         $underline = true;
+                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:highlight") {
+                        $highLight = true;
                     }
                 }
-            }
-
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
+            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
                 if ($rChild->getAttribute("xml:space") == 'preserve') {
                     $text = implode($this->parseText($rChild));
                 } else {
                     $text = trim(implode($this->parseText($rChild)), " ");
                 }
 
-            }
-
-            if ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
+            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
                 $brCount++;
             }
         }
 
         if ($text != null) {
-            return new Sentence($text, $bold, $italic, $underline, $brCount);
+            return new Sentence($text, $bold, $italic, $underline, $brCount, $highLight);
         } else {
             return null;
         }
