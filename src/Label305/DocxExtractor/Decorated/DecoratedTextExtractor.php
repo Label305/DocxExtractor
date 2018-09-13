@@ -125,6 +125,8 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         $underline = false;
         $brCount = 0;
         $highLight = false;
+        $superscript = false;
+        $subscript = false;
         $text = null;
 
         foreach ($rNode->childNodes as $rChild) {
@@ -147,6 +149,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                         $underline = true;
                     } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:highlight") {
                         $highLight = true;
+                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:vertAlign") {
+                        $variant = $propertyNode->getAttribute('w:val');
+                        if ($variant === 'superscript') {
+                            $superscript = true;
+                        }
+                        if ($variant === 'subscript') {
+                            $subscript = true;
+                        }
                     }
                 }
             } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
@@ -162,7 +172,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         }
 
         if ($text != null) {
-            return new Sentence($text, $bold, $italic, $underline, $brCount, $highLight);
+            return new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
         } else {
             return null;
         }

@@ -12,7 +12,8 @@ use DOMText;
  * Represents a list of <w:r> objects in the docx format. Does not contain
  * <w:p> data. That data is preserved in the extracted document.
  */
-class Paragraph extends ArrayObject {
+class Paragraph extends ArrayObject
+{
 
     /**
      * Conenience constructor for the user of the API
@@ -45,38 +46,55 @@ class Paragraph extends ArrayObject {
      * @param bool $italic
      * @param bool $underline
      * @param bool $highlight
+     * @param bool $superscript
+     * @param bool $subscript
      */
-    public function fillWithHTMLDom(DOMNode $node, $br = 0, $bold = false, $italic = false, $underline = false, $highlight = false)
-    {
+    public function fillWithHTMLDom(
+        DOMNode $node,
+        $br = 0,
+        $bold = false,
+        $italic = false,
+        $underline = false,
+        $highlight = false,
+        $superscript = false,
+        $subscript = false
+    ) {
         if ($node instanceof DOMText) {
 
-            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight);
+            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight, $superscript,
+                $subscript);
 
-        } else if ($node->childNodes !== null) {
+        } else {
+            if ($node->childNodes !== null) {
 
-            if ($node->nodeName == 'b' || $node->nodeName == 'strong') {
-                $bold = true;
-            }
+                if ($node->nodeName == 'b' || $node->nodeName == 'strong') {
+                    $bold = true;
+                }
+                if ($node->nodeName == 'i' || $node->nodeName == 'em') {
+                    $italic = true;
+                }
+                if ($node->nodeName == 'u') {
+                    $underline = true;
+                }
+                if ($node->nodeName == 'mark') {
+                    $highlight = true;
+                }
+                if ($node->nodeName == 'sup') {
+                    $superscript = true;
+                }
+                if ($node->nodeName == 'sub') {
+                    $subscript = true;
+                }
 
-            if ($node->nodeName == 'i' || $node->nodeName == 'em') {
-                $italic = true;
-            }
+                foreach ($node->childNodes as $child) {
 
-            if ($node->nodeName == 'u') {
-                $underline = true;
-            }
-
-            if ($node->nodeName == 'mark') {
-                $highlight = true;
-            }
-
-            foreach ($node->childNodes as $child) {
-
-                if ($child->nodeName == 'br') {
-                    $br++;
-                } else {
-                    $this->fillWithHTMLDom($child, $br, $bold, $italic, $underline, $highlight);
-                    $br = 0;
+                    if ($child->nodeName == 'br') {
+                        $br++;
+                    } else {
+                        $this->fillWithHTMLDom($child, $br, $bold, $italic, $underline, $highlight, $superscript,
+                            $subscript);
+                        $br = 0;
+                    }
                 }
             }
         }
@@ -95,6 +113,8 @@ class Paragraph extends ArrayObject {
         $italicIsActive = false;
         $underlineIsActive = false;
         $highlightActive = false;
+        $superscriptActive = false;
+        $subscriptActive = false;
 
         for ($i = 0; $i < count($this); $i++) {
 
@@ -124,6 +144,18 @@ class Paragraph extends ArrayObject {
                 $openHighlight = true;
             }
 
+            $openSuperscript = false;
+            if ($sentence->superscript && !$superscriptActive) {
+                $superscriptActive = true;
+                $openSuperscript = true;
+            }
+
+            $openSubscript = false;
+            if ($sentence->subscript && !$subscriptActive) {
+                $subscriptActive = true;
+                $openSubscript = true;
+            }
+
             $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
             $closeBold = false;
             if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
@@ -149,11 +181,23 @@ class Paragraph extends ArrayObject {
                 $closeHighlight = true;
             }
 
-            $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $closeBold, $closeItalic, $closeUnderline, $closeHighlight);
+            $closeSuperscript = false;
+            if ($nextSentence === null || (!$nextSentence->superscript && $superscriptActive)) {
+                $superscriptActive = false;
+                $closeSuperscript = true;
+            }
+
+            $closeSubscript = false;
+            if ($nextSentence === null || (!$nextSentence->subscript && $subscriptActive)) {
+                $subscriptActive = false;
+                $closeSubscript = true;
+            }
+
+            $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $openSuperscript,
+                $openSubscript, $closeBold, $closeItalic, $closeUnderline, $closeHighlight, $closeSuperscript,
+                $closeSubscript);
         }
 
         return $result;
     }
-
-
 }

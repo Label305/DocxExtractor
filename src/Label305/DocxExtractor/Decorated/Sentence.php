@@ -33,11 +33,21 @@ class Sentence {
     public $highlight;
 
     /**
+     * @var bool If sentence is superscript or not
+     */
+    public $superscript;
+
+    /**
+     * @var bool If sentence is subscriot or not
+     */
+    public $subscript;
+
+    /**
      * @var int Number of line breaks
      */
     public $br;
 
-    function __construct($text, $bold, $italic, $underline, $br, $highlight)
+    function __construct($text, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript)
     {
         $this->text = $text;
         $this->bold = $bold;
@@ -45,6 +55,8 @@ class Sentence {
         $this->underline = $underline;
         $this->br = $br;
         $this->highlight = $highlight;
+        $this->superscript = $superscript;
+        $this->subscript = $subscript;
     }
 
     /**
@@ -68,6 +80,12 @@ class Sentence {
         if ($this->highlight) {
             $value .= '<w:highlight w:val="yellow"/>';
         }
+        if ($this->superscript) {
+            $value .= '<w:vertAlign w:val="superscript"/>';
+        }
+        if ($this->subscript) {
+            $value .= '<w:vertAlign w:val="subscript"/>';
+        }
 
         $value .= "</w:rPr>";
 
@@ -89,11 +107,15 @@ class Sentence {
      * @param bool $firstWrappedInBold
      * @param bool $firstWrappedInItalic
      * @param bool $firstWrappedInUnderline
+     * @param bool $firstWrappedInHighlight
+     * @param bool $firstWrappedInSuperscript
+     * @param bool $firstWrappedInSubscript
      * @param bool $lastWrappedInBold
      * @param bool $lastWrappedInItalic
      * @param bool $lastWrappedInUnderline
-     * @param bool $firstWrappedInHighlight
      * @param bool $lastWrappedInHighlight
+     * @param bool $lastWrappedInSuperscript
+     * @param bool $lastWrappedInSubscript
      * @return string HTML string
      */
     public function toHTML(
@@ -101,10 +123,14 @@ class Sentence {
         $firstWrappedInItalic = true,
         $firstWrappedInUnderline = true,
         $firstWrappedInHighlight = true,
+        $firstWrappedInSuperscript = true,
+        $firstWrappedInSubscript = true,
         $lastWrappedInBold = true,
         $lastWrappedInItalic = true,
         $lastWrappedInUnderline = true,
-        $lastWrappedInHighlight = true
+        $lastWrappedInHighlight = true,
+        $lastWrappedInSuperscript = true,
+        $lastWrappedInSubscript = true
     )
     {
         $value = '';
@@ -125,9 +151,21 @@ class Sentence {
         if ($this->underline && $firstWrappedInUnderline) {
             $value .= "<u>";
         }
+        if ($this->subscript && $firstWrappedInSubscript) {
+            $value .= "<sub>";
+        }
+        if ($this->superscript && $firstWrappedInSuperscript) {
+            $value .= "<sup>";
+        }
 
         $value .= htmlentities($this->text);
 
+        if ($this->superscript && $lastWrappedInSuperscript) {
+            $value .= "</sup>";
+        }
+        if ($this->subscript && $lastWrappedInSubscript) {
+            $value .= "</sub>";
+        }
         if ($this->underline && $lastWrappedInUnderline) {
             $value .= "</u>";
         }
