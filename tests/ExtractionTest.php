@@ -294,4 +294,28 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/markings-injected.docx');
     }
 
+    public function testGetSuperscriptInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/superscript.docx', __DIR__.'/fixtures/superscript-extracted.docx');
+
+        $this->assertEquals("1", $mapping[0][3]->text);
+        $this->assertTrue($mapping[0][3]->superscript);
+        $this->assertFalse($mapping[0][3]->subscript);
+
+        unlink(__DIR__.'/fixtures/superscript-extracted.docx');
+    }
+
+    public function testGetSubscriptInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/subscript.docx', __DIR__.'/fixtures/subscript-extracted.docx');
+
+        $this->assertEquals("1", $mapping[0][1]->text);
+        $this->assertTrue($mapping[0][1]->subscript);
+        $this->assertFalse($mapping[0][1]->superscript);
+
+        unlink(__DIR__.'/fixtures/subscript-extracted.docx');
+    }
+
 }
