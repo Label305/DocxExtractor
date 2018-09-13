@@ -216,26 +216,54 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/smart_tag-injected.docx');
     }
 
-    public function testCrazyHyperlinksInDocument() {
+    public function testHyperlinks2InDocument() {
 
         $extractor = new DecoratedTextExtractor();
-        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy_hyperlinks.docx', __DIR__.'/fixtures/crazy_hyperlinks-extracted.docx');
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_2.docx', __DIR__.'/fixtures/hyperlinks_2-extracted.docx');
 
         $this->assertEquals("Meer weten over deze doopsuikerdoosjes", $mapping[9][0]->text); // This is a link
 
         $mapping[9][0]->text = "Link vertaald";
 
         $injector = new DecoratedTextInjector();
-        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/crazy_hyperlinks-extracted.docx', __DIR__.'/fixtures/crazy_hyperlinks-injected.docx');
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlinks_2-extracted.docx', __DIR__.'/fixtures/hyperlinks_2-injected.docx');
 
         $otherExtractor = new DecoratedTextExtractor();
-        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy_hyperlinks-injected.docx', __DIR__.'/fixtures/crazy_hyperlinks-injected-extracted.docx');
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_2-injected.docx', __DIR__.'/fixtures/hyperlinks_2-injected-extracted.docx');
 
         $this->assertEquals("Link vertaald", $otherMapping[9][0]->text);
 
-        unlink(__DIR__.'/fixtures/crazy_hyperlinks-extracted.docx');
-        unlink(__DIR__.'/fixtures/crazy_hyperlinks-injected-extracted.docx');
-        unlink(__DIR__.'/fixtures/crazy_hyperlinks-injected.docx');
+        unlink(__DIR__.'/fixtures/hyperlinks_2-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlinks_2-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlinks_2-injected.docx');
+    }
+
+    public function testHyperlinksInTextInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_in_text.docx', __DIR__.'/fixtures/hyperlinks_in_text-extracted.docx');
+
+        $this->assertEquals("De website ", $mapping[1][0]->text);
+        $this->assertEquals("www.apcoa.nl", $mapping[1][1]->text);
+        $this->assertEquals(" en de daaraan gekoppelde internetdiensten worden u ter beschikking gesteld door APCOA PARKING Nederland B.V. (hierna: APCOA PARKING), statutair gevestigd te Rotterdam en ingeschreven in het handelsregister van de Kamer van Koophandel Provincie onder nummer ", $mapping[1][2]->text);
+
+        $mapping[1][0]->text = "The website ";
+        $mapping[1][1]->text = "www.apcoa.nl";
+        $mapping[1][2]->text = " and the associated internet services are made available to you by APCOA PARKING Nederland B.V. (hereinafter: APCOA PARKING)";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlinks_in_text-extracted.docx', __DIR__.'/fixtures/hyperlinks_in_text-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_in_text-injected.docx', __DIR__.'/fixtures/hyperlinks_in_text-injected-extracted.docx');
+
+        $this->assertEquals("The website ", $otherMapping[1][0]->text);
+        $this->assertEquals("www.apcoa.nl", $otherMapping[1][1]->text);
+        $this->assertEquals(" and the associated internet services are made available to you by APCOA PARKING Nederland B.V. (hereinafter: APCOA PARKING)", $otherMapping[1][2]->text);
+
+        unlink(__DIR__.'/fixtures/hyperlinks_in_text-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlinks_in_text-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/hyperlinks_in_text-injected.docx');
     }
 
     public function testMarkingsInDocument() {
