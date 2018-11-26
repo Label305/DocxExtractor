@@ -1,9 +1,8 @@
 language: php
 php:
 - 5.4
-
 install: composer install
-
 notifications:
   email: false
-  slack: label305:wrsrU02XRIn0hHmNHrLqGFk2
+  slack:
+    secure: JNRA2tjamel+hCJ/T+KT6plqZC7ECcyMOAB+ftbmoySiEaabpkgJml0aVTHdCs90zhmRMbTIFPwcPtpMQ7aDRuymXi05KHUTifHCLtN8c6iQ/GmzLKvwjJZ1oxo0jjza0AIf5g/LxsbYF1t55cvKPc5rVP3YYpY0ixDJeXQxaFg=
