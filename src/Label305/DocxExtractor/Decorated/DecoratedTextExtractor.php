@@ -171,8 +171,10 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
             }
         }
 
-        if ($text != null) {
+        if ($text !== null) {
             return new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
+        } elseif ($brCount > 0 && $text === null) {
+            return new Sentence('', $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
         } else {
             return null;
         }
