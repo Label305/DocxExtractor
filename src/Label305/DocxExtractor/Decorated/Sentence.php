@@ -1,6 +1,6 @@
-<?php namespace Label305\DocxExtractor\Decorated;
-use DOMDocument;
-use DOMDocumentFragment;
+<?php
+
+namespace Label305\DocxExtractor\Decorated;
 
 /**
  * Class Sentence
@@ -10,6 +10,9 @@ use DOMDocumentFragment;
  */
 class Sentence {
 
+    /**
+     * @var string
+     */
     public $text;
 
     /**
@@ -181,6 +184,4 @@ class Sentence {
 
         return $value;
     }
-
-
 }
