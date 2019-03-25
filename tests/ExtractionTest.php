@@ -184,19 +184,21 @@ class ExtractionTest extends TestCase {
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/smart_tag.docx', __DIR__.'/fixtures/smart_tag-extracted.docx');
 
         // There are smart tags
+        $this->assertEquals(", reading, trial and error and working with one of the most skilled beekeepers of ", $mapping[5][2]->text);
         $this->assertEquals("France", $mapping[5][3]->text);
         $this->assertEquals("Gascony", $mapping[26][3]->text);
         $this->assertEquals("25 km", $mapping[31][3]->text);
         $this->assertEquals("Tarbes", $mapping[35][4]->text);
         $this->assertEquals("Tarbes", $mapping[35][6]->text);
-        $this->assertEquals("Achater", $mapping[50][5]->text);
+        $this->assertEquals("Achater", $mapping[50][6]->text);
 
+        $mapping[5][2]->text = Paragraph::paragraphWithHTML(", reading, trial and error and working with one of the most skilled beekeepers of VERTAALD")->toHTML();
         $mapping[5][3]->text = Paragraph::paragraphWithHTML("Frankrijk")->toHTML();
         $mapping[26][3]->text = Paragraph::paragraphWithHTML("Gascony vertaald")->toHTML();
         $mapping[31][3]->text = Paragraph::paragraphWithHTML("25 kilometer")->toHTML();
         $mapping[35][4]->text = Paragraph::paragraphWithHTML("Tarbes vertaald")->toHTML();
         $mapping[35][6]->text = Paragraph::paragraphWithHTML("Tarbes vertaald 2")->toHTML();
-        $mapping[50][5]->text = Paragraph::paragraphWithHTML("Achater vertaald")->toHTML();
+        $mapping[50][6]->text = Paragraph::paragraphWithHTML("Achater vertaald")->toHTML();
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/smart_tag-extracted.docx', __DIR__.'/fixtures/smart_tag-injected.docx');
@@ -204,12 +206,13 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/smart_tag-injected.docx', __DIR__.'/fixtures/smart_tag-injected-extracted.docx');
 
+        $this->assertEquals(", reading, trial and error and working with one of the most skilled beekeepers of VERTAALD", $otherMapping[5][2]->text);
         $this->assertEquals("Frankrijk", $otherMapping[5][3]->text);
         $this->assertEquals("Gascony vertaald", $otherMapping[26][3]->text);
         $this->assertEquals("25 kilometer", $otherMapping[31][3]->text);
         $this->assertEquals("Tarbes vertaald", $otherMapping[35][4]->text);
         $this->assertEquals("Tarbes vertaald 2", $otherMapping[35][6]->text);
-        $this->assertEquals("Achater vertaald", $otherMapping[50][5]->text);
+        $this->assertEquals("Achater vertaald", $otherMapping[50][6]->text);
 
         unlink(__DIR__.'/fixtures/smart_tag-extracted.docx');
         unlink(__DIR__.'/fixtures/smart_tag-injected-extracted.docx');
@@ -316,6 +319,44 @@ class ExtractionTest extends TestCase {
         $this->assertFalse($mapping[0][1]->superscript);
 
         unlink(__DIR__.'/fixtures/subscript-extracted.docx');
+    }
+
+    public function testNestedSentencesWithBr() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/nested.docx', __DIR__.'/fixtures/nested-extracted.docx');
+
+        $this->assertEquals("André van Meurs", $mapping[0][0]->text);
+        $this->assertEquals(1, $mapping[0][1]->br);
+        $this->assertEquals("Ruimtebaan 201", $mapping[0][2]->text);
+        $this->assertEquals(1, $mapping[0][3]->br);
+        $this->assertEquals("2728 MK Zoetermeer", $mapping[0][4]->text);
+
+        $this->assertEquals("Ken je dat gevoel dat je op een terrasje zit, een feestje bezoekt of op een festival bent en dat de DJ muziek op zet die zo goed bij je past, dat het kippenvel meteen op je armen schiet? Die DJ ben ik en dat gevoel herken ik dus uit duizenden.", $mapping[5][0]->text);
+        $this->assertEquals(1, $mapping[5][1]->br);
+        $this->assertEquals("Het is exact het gevoel wat ik had bij het lezen van uw vacature.", $mapping[5][2]->text);
+
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("André van Meurs VERTAALD")->toHTML();
+        $mapping[0][2]->text = Paragraph::paragraphWithHTML("Ruimtebaan 201 VERTAALD")->toHTML();
+        $mapping[0][4]->text = Paragraph::paragraphWithHTML("2728 MK Zoetermeer VERTAALD")->toHTML();
+        $mapping[5][0]->text = Paragraph::paragraphWithHTML("Ken je dat (..) VERTAALD")->toHTML();
+        $mapping[5][2]->text = Paragraph::paragraphWithHTML("Het is exact het gevoel wat ik had bij het lezen van uw vacature VERTAALD")->toHTML();
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/nested-extracted.docx', __DIR__.'/fixtures/nested-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/nested-injected.docx', __DIR__.'/fixtures/nested-injected-extracted.docx');
+
+        $this->assertEquals("Andr&eacute; van Meurs VERTAALD", $mapping[0][0]->text);
+        $this->assertEquals("Ruimtebaan 201 VERTAALD", $mapping[0][2]->text);
+        $this->assertEquals("2728 MK Zoetermeer VERTAALD", $mapping[0][4]->text);
+        $this->assertEquals("Ken je dat (..) VERTAALD", $mapping[5][0]->text);
+        $this->assertEquals("Het is exact het gevoel wat ik had bij het lezen van uw vacature VERTAALD", $mapping[5][2]->text);
+
+        unlink(__DIR__.'/fixtures/nested-extracted.docx');
+        unlink(__DIR__.'/fixtures/nested-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/nested-injected.docx');
     }
 
 }

@@ -32,7 +32,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
 
         $this->nextTagIdentifier = 0;
         $result = $this->replaceAndMapValues($prepared['dom']->documentElement);
-
         $this->saveDocument($prepared['dom'], $prepared["archive"], $mappingFileSaveLocationPath);
 
         return $result;
@@ -89,9 +88,13 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
 
             foreach ($paragraph->childNodes as $paragraphChild) {
                 if ($paragraphChild instanceof DOMElement && in_array($paragraphChild->nodeName, $nodeNames)) {
-                    $paragraphPart = $this->parseRNode($paragraphChild);
-                    if ($paragraphPart !== null) {
-                        $parts[] = $paragraphPart;
+                    $paragraphParts = $this->parseRNode($paragraphChild);
+
+                    if (count($paragraphParts) !== 0) {
+                        foreach ($paragraphParts as $paragraphPart) {
+                            $parts[] = $paragraphPart;
+                        }
+
                         if ($firstTextChild === null) {
                             $firstTextChild = $paragraphChild;
                         } else {
@@ -118,6 +121,10 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         return $result;
     }
 
+    /**
+     * @param DOMElement $rNode
+     * @return array
+     */
     protected function parseRNode(DOMElement $rNode)
     {
         $bold = false;
@@ -128,58 +135,100 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         $superscript = false;
         $subscript = false;
         $text = null;
+        $result = [];
 
         foreach ($rNode->childNodes as $rChild) {
+            $this->parseChildNode($rChild, $result, $bold, $italic, $underline, $brCount, $highLight,
+                $superscript, $subscript, $text
+            );
+        }
 
-            if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
-                foreach ($rChild->childNodes as $propertyNode) {
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
-                        $text = trim(implode($this->parseText($rChild)), " ");
+        return $result;
+    }
+
+    /**
+     * @param $rChild
+     * @param $result
+     * @param $bold
+     * @param $italic
+     * @param $underline
+     * @param $brCount
+     * @param $highLight
+     * @param $superscript
+     * @param $subscript
+     * @param $text
+     */
+    private function parseChildNode(
+        $rChild,
+        &$result,
+        &$bold,
+        &$italic,
+        &$underline,
+        &$brCount,
+        &$highLight,
+        &$superscript,
+        &$subscript,
+        &$text
+    ) {
+        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
+            foreach ($rChild->childNodes as $propertyNode) {
+                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
+                    if ($propertyNode->getAttribute("xml:space") == 'preserve') {
+                        $text = implode($this->parseText($propertyNode));
                     } else {
-                        $text = trim(implode($this->parseText($rChild)), " ");
+                        $text = trim(implode($this->parseText($propertyNode)), " ");
                     }
-                }
-            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
-                foreach ($rChild->childNodes as $propertyNode) {
-                    if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
-                        $bold = true;
-                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
-                        $italic = true;
-                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
-                        $underline = true;
-                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:highlight") {
-                        $highLight = true;
-                    } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:vertAlign") {
-                        $variant = $propertyNode->getAttribute('w:val');
-                        if ($variant === 'superscript') {
-                            $superscript = true;
-                        }
-                        if ($variant === 'subscript') {
-                            $subscript = true;
-                        }
-                    }
-                }
-            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
-                if ($rChild->getAttribute("xml:space") == 'preserve') {
-                    $text = implode($this->parseText($rChild));
                 } else {
-                    $text = trim(implode($this->parseText($rChild)), " ");
+                    $this->parseChildNode($propertyNode, $result, $bold, $italic, $underline, $brCount, $highLight,
+                        $superscript, $subscript, $text);
                 }
-
-            } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
-                $brCount++;
             }
+        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
+            foreach ($rChild->childNodes as $propertyNode) {
+                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
+                    $bold = true;
+                } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
+                    $italic = true;
+                } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:u") {
+                    $underline = true;
+                } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:highlight") {
+                    $highLight = true;
+                } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:vertAlign") {
+                    $variant = $propertyNode->getAttribute('w:val');
+                    if ($variant === 'superscript') {
+                        $superscript = true;
+                    }
+                    if ($variant === 'subscript') {
+                        $subscript = true;
+                    }
+                }
+            }
+        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
+            if ($rChild->getAttribute("xml:space") == 'preserve') {
+                $text = implode($this->parseText($rChild));
+            } else {
+                $text = trim(implode($this->parseText($rChild)), " ");
+            }
+
+        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
+            $brCount++;
         }
 
         if ($text !== null) {
-            return new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
-        } elseif ($brCount > 0 && $text === null) {
-            return new Sentence('', $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
-        } else {
-            return null;
+            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
+            $brCount = 0;
+            $text = null;
+        } elseif ($brCount !== 0) {
+            $result[] = new Sentence('', $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
+            $brCount = 0;
+            $text = null;
         }
     }
 
+    /**
+     * @param DOMNode $node
+     * @return array
+     */
     protected function parseText(DOMNode $node)
     {
         $result = [];
@@ -188,7 +237,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
             $result[] = $node->nodeValue;
         }
 
-        if ($node->childNodes !== null) {
+        if ($node->hasChildNodes()) {
             foreach ($node->childNodes as $child) {
                 $result = array_merge(
                     $result,
@@ -196,9 +245,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 );
             }
         }
-
         return $result;
     }
-
-
 }
