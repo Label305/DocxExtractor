@@ -83,7 +83,8 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
             $nodeNames = [
                 "w:r",
                 "w:hyperlink",
-                "w:smartTag"
+                "w:smartTag",
+                "mc:AlternateContent"
             ];
 
             foreach ($paragraph->childNodes as $paragraphChild) {
@@ -170,7 +171,16 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         &$subscript,
         &$text
     ) {
-        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
+        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["mc:AlternateContent", "mc:Fallback"])) {
+            foreach ($rChild->childNodes as $childNode) {
+                if ($childNode->nodeName === 'mc:Fallback') {
+                    $text = trim(implode($this->parseText($childNode)));
+                } else {
+                    $this->parseChildNode($childNode, $result, $bold, $italic, $underline, $brCount, $highLight,
+                        $superscript, $subscript, $text);
+                }
+            }
+        } elseif ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
             foreach ($rChild->childNodes as $propertyNode) {
                 if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
                     if ($propertyNode->getAttribute("xml:space") == 'preserve') {

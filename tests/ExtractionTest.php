@@ -359,4 +359,13 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/nested-injected.docx');
     }
 
+    public function testGetTextboxInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/textbox.docx', __DIR__.'/fixtures/textbox-extracted.docx');
+        $this->assertEquals("This is a textbox", $mapping[0][0]->text);
+
+        unlink(__DIR__.'/fixtures/textbox-extracted.docx');
+    }
+
 }
