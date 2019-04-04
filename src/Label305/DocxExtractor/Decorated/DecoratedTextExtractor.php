@@ -174,7 +174,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["mc:AlternateContent", "mc:Fallback"])) {
             foreach ($rChild->childNodes as $childNode) {
                 if ($childNode->nodeName === 'mc:Fallback') {
-                    $text = trim(implode($this->parseText($childNode)));
+                    $text = trim(implode($this->parseText($childNode)), " ");
                 } else {
                     $this->parseChildNode($childNode, $result, $bold, $italic, $underline, $brCount, $highLight,
                         $superscript, $subscript, $text);
@@ -224,7 +224,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
             $brCount++;
         }
 
-        if ($text !== null) {
+        if ($text !== null && strlen($text) !== 0) {
             $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
             $brCount = 0;
             $text = null;
