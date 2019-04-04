@@ -52,6 +52,17 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 $result,
                 $this->replaceAndMapValuesForParagraph($node)
             );
+        } elseif ($node instanceof DOMElement && $node->nodeName == "w:sdtContent") {
+            if ($node->childNodes !== null) {
+                foreach ($node->childNodes as $child) {
+                    if ($child instanceof DOMElement && $child->nodeName == "w:p") {
+                        $result = array_merge(
+                            $result,
+                            $this->replaceAndMapValuesForParagraph($child)
+                        );
+                    }
+                }
+            }
         } else {
             if ($node->childNodes !== null) {
                 foreach ($node->childNodes as $child) {
@@ -73,7 +84,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     protected function replaceAndMapValuesForParagraph(DOMNode $paragraph)
     {
         $result = [];
-
         if ($paragraph->childNodes !== null) {
 
             $firstTextChild = null;
@@ -95,7 +105,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                         foreach ($paragraphParts as $paragraphPart) {
                             $parts[] = $paragraphPart;
                         }
-
                         if ($firstTextChild === null) {
                             $firstTextChild = $paragraphChild;
                         } else {
@@ -128,6 +137,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
      */
     protected function parseRNode(DOMElement $rNode)
     {
+        $webHidden = false;
         $bold = false;
         $italic = false;
         $underline = false;
@@ -139,7 +149,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         $result = [];
 
         foreach ($rNode->childNodes as $rChild) {
-            $this->parseChildNode($rChild, $result, $bold, $italic, $underline, $brCount, $highLight,
+            $this->parseChildNode($rChild, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
                 $superscript, $subscript, $text
             );
         }
@@ -150,6 +160,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     /**
      * @param $rChild
      * @param $result
+     * @param $webHidden
      * @param $bold
      * @param $italic
      * @param $underline
@@ -162,6 +173,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     private function parseChildNode(
         $rChild,
         &$result,
+        &$webHidden,
         &$bold,
         &$italic,
         &$underline,
@@ -176,7 +188,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 if ($childNode->nodeName === 'mc:Fallback') {
                     $text = trim(implode($this->parseText($childNode)), " ");
                 } else {
-                    $this->parseChildNode($childNode, $result, $bold, $italic, $underline, $brCount, $highLight,
+                    $this->parseChildNode($childNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
                         $superscript, $subscript, $text);
                 }
             }
@@ -189,13 +201,15 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                         $text = trim(implode($this->parseText($propertyNode)), " ");
                     }
                 } else {
-                    $this->parseChildNode($propertyNode, $result, $bold, $italic, $underline, $brCount, $highLight,
+                    $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
                         $superscript, $subscript, $text);
                 }
             }
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
             foreach ($rChild->childNodes as $propertyNode) {
-                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
+                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:webHidden") {
+                    $webHidden = true;
+                } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:b") {
                     $bold = true;
                 } elseif ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:i") {
                     $italic = true;
@@ -207,8 +221,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     $variant = $propertyNode->getAttribute('w:val');
                     if ($variant === 'superscript') {
                         $superscript = true;
-                    }
-                    if ($variant === 'subscript') {
+                    } elseif ($variant === 'subscript') {
                         $subscript = true;
                     }
                 }
@@ -224,12 +237,9 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
             $brCount++;
         }
 
-        if ($text !== null && strlen($text) !== 0) {
+        if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
+
             $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
-            $brCount = 0;
-            $text = null;
-        } elseif ($brCount !== 0) {
-            $result[] = new Sentence('', $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript);
             $brCount = 0;
             $text = null;
         }
