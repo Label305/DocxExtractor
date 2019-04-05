@@ -348,15 +348,36 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/nested-injected.docx', __DIR__.'/fixtures/nested-injected-extracted.docx');
 
-        $this->assertEquals("Andr&eacute; van Meurs VERTAALD", $mapping[0][0]->text);
-        $this->assertEquals("Ruimtebaan 201 VERTAALD", $mapping[0][2]->text);
-        $this->assertEquals("2728 MK Zoetermeer VERTAALD", $mapping[0][4]->text);
-        $this->assertEquals("Ken je dat (..) VERTAALD", $mapping[5][0]->text);
-        $this->assertEquals("Het is exact het gevoel wat ik had bij het lezen van uw vacature VERTAALD", $mapping[5][2]->text);
+        $this->assertEquals("Andr&eacute; van Meurs VERTAALD", $otherMapping[0][0]->text);
+        $this->assertEquals("Ruimtebaan 201 VERTAALD", $otherMapping[0][2]->text);
+        $this->assertEquals("2728 MK Zoetermeer VERTAALD", $otherMapping[0][4]->text);
+        $this->assertEquals("Ken je dat (..) VERTAALD", $otherMapping[5][0]->text);
+        $this->assertEquals("Het is exact het gevoel wat ik had bij het lezen van uw vacature VERTAALD", $otherMapping[5][2]->text);
 
         unlink(__DIR__.'/fixtures/nested-extracted.docx');
         unlink(__DIR__.'/fixtures/nested-injected-extracted.docx');
         unlink(__DIR__.'/fixtures/nested-injected.docx');
+    }
+
+    public function testTextboxInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/textbox.docx', __DIR__.'/fixtures/textbox-extracted.docx');
+        $this->assertEquals("This is a textbox", $mapping[0][0]->text);
+
+        $mapping[0][0]->text = "Dit is een textbox";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/textbox-extracted.docx', __DIR__.'/fixtures/textbox-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/textbox-injected.docx', __DIR__.'/fixtures/textbox-injected-extracted.docx');
+
+        $this->assertEquals("Dit is een textbox", $otherMapping[0][0]->text);
+
+        unlink(__DIR__.'/fixtures/textbox-extracted.docx');
+        unlink(__DIR__.'/fixtures/textbox-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/textbox-injected.docx');
     }
 
 }
