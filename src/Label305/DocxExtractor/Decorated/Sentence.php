@@ -50,6 +50,7 @@ class Sentence {
      */
     public $br;
 
+
     function __construct($text, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript)
     {
         $this->text = $text;
@@ -69,7 +70,8 @@ class Sentence {
      */
     public function toDocxXML()
     {
-        $value = '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:rPr>';
+        $value = '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        $value .= '<w:rPr>';
 
         if ($this->bold) {
             $value .= "<w:b/>";

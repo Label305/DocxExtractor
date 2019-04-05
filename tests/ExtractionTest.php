@@ -121,10 +121,9 @@ class ExtractionTest extends TestCase {
         $extractor = new DecoratedTextExtractor();
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal.docx', __DIR__.'/fixtures/normal-extracted.docx');
-
         $this->assertEquals("Aan", $mapping[0][0]->text);
 
-        $mapping[0][0]->text = Paragraph::paragraphWithHTML("At&nbsp;")->toHTML();
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("At")->toHTML();
         $mapping[0][1]->text = Paragraph::paragraphWithHTML("The&nbsp;")->toHTML();
         $mapping[0][2]->text = "Edge";
         $mapping[0][3]->text = Paragraph::paragraphWithHTML("&Atilde;")->toHTML();
@@ -135,7 +134,7 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/normal-injected.docx', __DIR__.'/fixtures/normal-injected-extracted.docx');
 
-        $this->assertEquals("At ", $otherMapping[0][0]->text);
+        $this->assertEquals("At", $otherMapping[0][0]->text);
         $this->assertEquals("The ", $otherMapping[0][1]->text);
         $this->assertEquals("Edge", $otherMapping[0][2]->text);
         $this->assertEquals("&Atilde;", $otherMapping[0][3]->text);
@@ -359,25 +358,60 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/nested-injected.docx');
     }
 
-    public function testTextboxInDocument() {
+
+    public function testTextboxInDocument(){
 
         $extractor = new DecoratedTextExtractor();
-        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/textbox.docx', __DIR__.'/fixtures/textbox-extracted.docx');
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox.docx',
+            __DIR__ . '/fixtures/textbox-extracted.docx');
         $this->assertEquals("This is a textbox", $mapping[0][0]->text);
 
         $mapping[0][0]->text = "Dit is een textbox";
 
         $injector = new DecoratedTextInjector();
-        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/textbox-extracted.docx', __DIR__.'/fixtures/textbox-injected.docx');
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/textbox-extracted.docx',
+            __DIR__ . '/fixtures/textbox-injected.docx');
 
         $otherExtractor = new DecoratedTextExtractor();
-        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/textbox-injected.docx', __DIR__.'/fixtures/textbox-injected-extracted.docx');
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox-injected.docx',
+            __DIR__ . '/fixtures/textbox-injected-extracted.docx');
 
         $this->assertEquals("Dit is een textbox", $otherMapping[0][0]->text);
 
-        unlink(__DIR__.'/fixtures/textbox-extracted.docx');
-        unlink(__DIR__.'/fixtures/textbox-injected-extracted.docx');
-        unlink(__DIR__.'/fixtures/textbox-injected.docx');
+        unlink(__DIR__ . '/fixtures/textbox-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-injected.docx');
+    }
+
+    public function testGetTableOfContentsInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/table-of-contents.docx', __DIR__.'/fixtures/table-of-contents-extracted.docx');
+
+        $this->assertEquals("Table of Contents", $mapping[0][0]->text);
+        $this->assertEquals("Title", $mapping[1][0]->text);
+        $this->assertEquals("Title 2", $mapping[2][0]->text);
+        $this->assertEquals("Title 3", $mapping[3][0]->text);
+
+        $mapping[0][0]->text = "Inhoudsopgave";
+        $mapping[1][0]->text = "Titel";
+        $mapping[2][0]->text = "Titel 2";
+        $mapping[3][0]->text = "Titel 3";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/table-of-contents-extracted.docx', __DIR__.'/fixtures/table-of-contents-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/table-of-contents-injected.docx', __DIR__.'/fixtures/table-of-contents-injected-extracted.docx');
+
+        $this->assertEquals("Inhoudsopgave", $otherMapping[0][0]->text);
+        $this->assertEquals("Titel", $otherMapping[1][0]->text);
+        $this->assertEquals("Titel 2", $otherMapping[2][0]->text);
+        $this->assertEquals("Titel 3", $otherMapping[3][0]->text);
+
+        unlink(__DIR__.'/fixtures/table-of-contents-extracted.docx');
+        unlink(__DIR__.'/fixtures/table-of-contents-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/table-of-contents-injected.docx');
     }
 
 }
