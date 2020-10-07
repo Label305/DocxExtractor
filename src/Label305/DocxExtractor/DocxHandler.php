@@ -69,11 +69,23 @@ abstract class DocxHandler {
         $zip->extractTo($temp);
         $zip->close();
 
-        //Check if file exists
-        $document = $temp . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
+        // Sometimes Word creates another document.xml.
+        $possibleFileNames = ['document.xml'];
+        for ($i = 0; $i <= 10; $i++) {
+            $possibleFileNames[] = sprintf('document%s.xml', $i);
+        }
+
+        $document = null;
+        foreach ($possibleFileNames as $possibleFileName) {
+            //Check if file exists
+            $documentpath = $temp . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . $possibleFileName;
+            if (file_exists($documentpath)) {
+                $document = $documentpath;
+            }
+        }
 
         if (!file_exists($document)) {
-            throw new DocxFileException( 'Document.xml not found' );
+            throw new DocxFileException( 'document.xml not found' );
         }
 
         $documentXmlContents = file_get_contents($document);
