@@ -69,26 +69,9 @@ abstract class DocxHandler {
         $zip->extractTo($temp);
         $zip->close();
 
-        // Sometimes Word creates another document.xml.
-        $possibleFileNames = ['document.xml'];
-        for ($i = 0; $i <= 10; $i++) {
-            $possibleFileNames[] = sprintf('document%s.xml', $i);
-        }
+        $documentXMLLocation = $this->findDocumentXml($temp);
 
-        $document = null;
-        foreach ($possibleFileNames as $possibleFileName) {
-            //Check if file exists
-            $documentpath = $temp . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . $possibleFileName;
-            if (file_exists($documentpath)) {
-                $document = $documentpath;
-            }
-        }
-
-        if (!file_exists($document)) {
-            throw new DocxFileException( 'document.xml not found' );
-        }
-
-        $documentXmlContents = file_get_contents($document);
+        $documentXmlContents = file_get_contents($documentXMLLocation);
         $dom = new DOMDocument();
         $loadXMLResult = $dom->loadXML($documentXmlContents, LIBXML_NOERROR | LIBXML_NOWARNING);
 
@@ -98,7 +81,7 @@ abstract class DocxHandler {
 
         return [
             "dom" => $dom,
-            "document" => $document,
+            "document" => $documentXMLLocation,
             "archive" => $temp
         ];
     }
@@ -115,7 +98,8 @@ abstract class DocxHandler {
             throw new DocxFileException( 'Archive should exist: '. $archiveLocation );
         }
 
-        $documentXMLLocation = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . 'document.xml';
+        $documentXMLLocation = $this->findDocumentXml($archiveLocation);
+
         $newDocumentXMLContents = $dom->saveXml();
         file_put_contents($documentXMLLocation, $newDocumentXMLContents);
 
@@ -168,6 +152,30 @@ abstract class DocxHandler {
             (is_dir("$dir/$file")) ? rmdirRecursive("$dir/$file") : unlink("$dir/$file");
         }
         return rmdir($dir);
+    }
+
+    private function findDocumentXml($archiveLocation)
+    {
+        // Sometimes Word creates another document.xml.
+        $possibleFileNames = ['document.xml'];
+        for ($i = 0; $i <= 10; $i++) {
+            $possibleFileNames[] = sprintf('document%s.xml', $i);
+        }
+
+        $document = null;
+        foreach ($possibleFileNames as $possibleFileName) {
+            //Check if file exists
+            $documentpath = $archiveLocation . DIRECTORY_SEPARATOR . 'word' . DIRECTORY_SEPARATOR . $possibleFileName;
+            if (file_exists($documentpath)) {
+                $document = $documentpath;
+            }
+        }
+
+        if (!file_exists($document)) {
+            throw new DocxFileException( 'document.xml not found' );
+        }
+
+        return $document;
     }
 
 }
