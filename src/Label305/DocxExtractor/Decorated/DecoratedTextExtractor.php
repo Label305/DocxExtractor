@@ -2,7 +2,6 @@
 
 namespace Label305\DocxExtractor\Decorated;
 
-
 use DOMElement;
 use DOMNode;
 use DOMText;
@@ -48,18 +47,12 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         $result = [];
 
         if ($node instanceof DOMElement && $node->nodeName == "w:p") {
-            $result = array_merge(
-                $result,
-                $this->replaceAndMapValuesForParagraph($node)
-            );
+            $this->replaceAndMapValuesForParagraph($node, $result);
         } elseif ($node instanceof DOMElement && $node->nodeName == "w:sdtContent") {
             if ($node->childNodes !== null) {
                 foreach ($node->childNodes as $child) {
                     if ($child instanceof DOMElement && $child->nodeName == "w:p") {
-                        $result = array_merge(
-                            $result,
-                            $this->replaceAndMapValuesForParagraph($child)
-                        );
+                        $this->replaceAndMapValuesForParagraph($node, $result);
                     }
                 }
             }
@@ -79,11 +72,11 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
 
     /**
      * @param DOMNode $paragraph
+     * @param $result
      * @return array
      */
-    protected function replaceAndMapValuesForParagraph(DOMNode $paragraph)
+    protected function replaceAndMapValuesForParagraph(DOMNode $paragraph, &$result)
     {
-        $result = [];
         if ($paragraph->childNodes !== null) {
 
             $firstTextChild = null;
@@ -94,13 +87,18 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 "w:r",
                 "w:hyperlink",
                 "w:smartTag",
-                "mc:AlternateContent"
             ];
 
             foreach ($paragraph->childNodes as $paragraphChild) {
                 if ($paragraphChild instanceof DOMElement && in_array($paragraphChild->nodeName, $nodeNames)) {
-                    $paragraphParts = $this->parseRNode($paragraphChild);
 
+                    // Additional loops for specific elements
+                    if ($paragraphChild->childNodes !== null) {
+                        $this->replaceTextboxNode($paragraphChild, $result);
+                    }
+
+                    // Other elements, just parse
+                    $paragraphParts = $this->parseRNode($paragraphChild);
                     if (count($paragraphParts) !== 0) {
                         foreach ($paragraphParts as $paragraphPart) {
                             $parts[] = $paragraphPart;
@@ -111,6 +109,8 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                             $otherNodes[] = $paragraphChild;
                         }
                     }
+                } elseif ($paragraphChild instanceof DOMElement) {
+                    $this->replaceAndMapValuesForParagraph($paragraphChild, $result);
                 }
             }
 
@@ -129,6 +129,25 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         }
 
         return $result;
+    }
+
+    /**
+     * @param DOMElement $paragraphChild
+     *
+     * Separate loop to search textbox content
+     * @param $result
+     */
+    private function replaceTextboxNode(DOMElement $paragraphChild, &$result) {
+        foreach ($paragraphChild->childNodes as $childNode) {
+            if ($childNode->nodeName == "mc:AlternateContent") {
+                foreach ($childNode->childNodes as $childChildNode) {
+                    // Only translate the primary content
+                    if ($childChildNode instanceof DOMElement && $childChildNode->nodeName == "mc:Choice") {
+                        $this->replaceAndMapValuesForParagraph($childChildNode, $result);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -183,15 +202,12 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
         &$subscript,
         &$text
     ) {
-        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["mc:AlternateContent", "mc:Fallback"])) {
-            foreach ($rChild->childNodes as $childNode) {
-                if ($childNode->nodeName === 'mc:Fallback') {
-                    $text = trim(implode($this->parseText($childNode)), " ");
-                } else {
-                    $this->parseChildNode($childNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                        $superscript, $subscript, $text);
-                }
+        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:p"])) {
+            foreach ($rChild->childNodes as $propertyNode) {
+                $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
+                    $superscript, $subscript, $text);
             }
+
         } elseif ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
             foreach ($rChild->childNodes as $propertyNode) {
                 if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
@@ -205,6 +221,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                         $superscript, $subscript, $text);
                 }
             }
+
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
             foreach ($rChild->childNodes as $propertyNode) {
                 if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:webHidden") {
@@ -226,6 +243,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     }
                 }
             }
+            
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
             if ($rChild->getAttribute("xml:space") == 'preserve') {
                 $text = implode($this->parseText($rChild));
