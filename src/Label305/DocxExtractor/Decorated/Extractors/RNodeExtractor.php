@@ -74,16 +74,8 @@ class RNodeExtractor implements DecoratedExtractor
 
         } elseif ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
             foreach ($rChild->childNodes as $propertyNode) {
-                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
-                    if ($propertyNode->getAttribute("xml:space") == 'preserve') {
-                        $text = implode($this->parseText($propertyNode));
-                    } else {
-                        $text = trim(implode($this->parseText($propertyNode)), " ");
-                    }
-                } else {
-                    $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                        $superscript, $subscript, $text, $style);
-                }
+                $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
+                    $superscript, $subscript, $text, $style);
             }
 
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
@@ -109,11 +101,10 @@ class RNodeExtractor implements DecoratedExtractor
             }
 
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
-            if ($rChild->getAttribute("xml:space") == 'preserve') {
-                $text = implode($this->parseText($rChild));
-            } else {
-                $text = trim(implode($this->parseText($rChild)), " ");
-            }
+            $text = implode(" ", $this->parseText($rChild));
+
+        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:tab") {
+            $text = " ";
 
         } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
             $brCount++;
