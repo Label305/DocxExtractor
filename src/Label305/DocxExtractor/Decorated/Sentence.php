@@ -50,8 +50,13 @@ class Sentence {
      */
     public $br;
 
+    /**
+     * @var Style|null
+     */
+    public $style;
 
-    function __construct($text, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript)
+
+    function __construct($text, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript, $style = null)
     {
         $this->text = $text;
         $this->bold = $bold;
@@ -61,6 +66,7 @@ class Sentence {
         $this->highlight = $highlight;
         $this->superscript = $superscript;
         $this->subscript = $subscript;
+        $this->style = $style;
     }
 
     /**
@@ -72,6 +78,10 @@ class Sentence {
     {
         $value = '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
         $value .= '<w:rPr>';
+
+        if ($this->style !== null) {
+            $value .= $this->style->toDocxXML();
+        }
 
         if ($this->bold) {
             $value .= "<w:b/>";
