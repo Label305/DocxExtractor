@@ -273,13 +273,14 @@ class ExtractionTest extends TestCase {
         $extractor = new DecoratedTextExtractor();
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/markings.docx', __DIR__.'/fixtures/markings-extracted.docx');
 
-        $this->assertEquals("Energie gebruik ", $mapping[53][2]->text); // This is highlight
-        $this->assertEquals("volgens leveranciers opgave ", $mapping[53][3]->text); // This is highlight
-        $this->assertEquals("van A-merk", $mapping[53][4]->text); // This is highlight
 
-        $mapping[53][2]->text = "Dit is ";
-        $mapping[53][3]->text = "het vertaalde ";
-        $mapping[53][4]->text = "stuk tekst";
+        $this->assertEquals("Energie gebruik ", $mapping[54][2]->text); // This is highlight
+        $this->assertEquals("volgens leveranciers opgave ", $mapping[54][3]->text); // This is highlight
+        $this->assertEquals("van A-merk", $mapping[54][4]->text); // This is highlight
+
+        $mapping[54][2]->text = "Dit is ";
+        $mapping[54][3]->text = "het vertaalde ";
+        $mapping[54][4]->text = "stuk tekst";
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/markings-extracted.docx', __DIR__.'/fixtures/markings-injected.docx');
@@ -287,9 +288,9 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/markings-injected.docx', __DIR__.'/fixtures/markings-injected-extracted.docx');
 
-        $this->assertEquals("Dit is ", $otherMapping[53][2]->text);
-        $this->assertEquals("het vertaalde ", $otherMapping[53][3]->text);
-        $this->assertEquals("stuk tekst", $otherMapping[53][4]->text);
+        $this->assertEquals("Dit is ", $otherMapping[54][2]->text);
+        $this->assertEquals("het vertaalde ", $otherMapping[54][3]->text);
+        $this->assertEquals("stuk tekst", $otherMapping[54][4]->text);
 
         unlink(__DIR__.'/fixtures/markings-extracted.docx');
         unlink(__DIR__.'/fixtures/markings-injected-extracted.docx');
