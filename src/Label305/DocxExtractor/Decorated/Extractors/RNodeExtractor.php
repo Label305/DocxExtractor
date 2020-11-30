@@ -66,63 +66,61 @@ class RNodeExtractor implements DecoratedExtractor
         &$text,
         &$style
     ) {
-        if ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:p"])) {
-            foreach ($rChild->childNodes as $propertyNode) {
-                $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                    $superscript, $subscript, $text, $style);
-            }
-
-        } elseif ($rChild instanceof DOMElement && in_array($rChild->nodeName, ["w:r", "w:smartTag"])) {
-            foreach ($rChild->childNodes as $propertyNode) {
-                if ($propertyNode instanceof DOMElement && $propertyNode->nodeName == "w:t") {
-                    if ($propertyNode->getAttribute("xml:space") == 'preserve') {
-                        $text = implode($this->parseText($propertyNode));
-                    } else {
-                        $text = trim(implode($this->parseText($propertyNode)), " ");
+        if ($rChild instanceof DOMElement) {
+            switch ($rChild->nodeName) {
+                case "w:p" :
+                case "w:r" :
+                case "w:smartTag" :
+                    foreach ($rChild->childNodes as $propertyNode) {
+                        $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
+                            $superscript, $subscript, $text, $style);
                     }
-                } else {
-                    $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                        $superscript, $subscript, $text, $style);
-                }
+                    break;
+
+                case "w:rPr" :
+                    $rFonts = null;
+                    $color = null;
+                    $lang = null;
+                    $sz = null;
+                    $szCs = null;
+                    $position = null;
+                    $spacing = null;
+                    $hasStyle = false;
+
+                    foreach ($rChild->childNodes as $propertyNode) {
+                        if ($propertyNode instanceof DOMElement) {
+                            $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $hasStyle);
+                            $this->parseFormatting($propertyNode,$webHidden,$bold,$italic,$underline,$highLight,$superscript,$subscript);
+                        }
+                    }
+
+                    if ($hasStyle) {
+                        $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing);
+                    }
+                    break;
+
+                case "w:t" :
+                case "w:tab" :
+                    if ($rChild->nodeName == "w:tab") {
+                        $text = " ";
+                    } else {
+                        $text = implode(" ", $this->parseText($rChild));
+                    }
+                    break;
+
+                case "w:br" :
+                    $brCount++;
+                    break;
             }
-
-        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:rPr") {
-
-            $rFonts = null;
-            $color = null;
-            $lang = null;
-            $sz = null;
-            $szCs = null;
-            $position = null;
-            $spacing = null;
-            $hasStyle = false;
-
-            foreach ($rChild->childNodes as $propertyNode) {
-                if ($propertyNode instanceof DOMElement) {
-                    $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $hasStyle);
-                    $this->parseFormatting($propertyNode,$webHidden,$bold,$italic,$underline,$highLight,$superscript,$subscript);
-                }
-            }
-
-            if ($hasStyle) {
-                $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing);
-            }
-
-        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:t") {
-            if ($rChild->getAttribute("xml:space") == 'preserve') {
-                $text = implode($this->parseText($rChild));
-            } else {
-                $text = trim(implode($this->parseText($rChild)), " ");
-            }
-
-        } elseif ($rChild instanceof DOMElement && $rChild->nodeName == "w:br") {
-            $brCount++;
         }
 
         if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
 
             $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript, $style);
+
+            // Reset
             $brCount = 0;
+            $style = null;
             $text = null;
         }
     }
