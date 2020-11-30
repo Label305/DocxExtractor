@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Thijs
- * Date: 13-11-14
- * Time: 11:46
- */
 
 namespace Label305\DocxExtractor\Decorated;
-
 
 use DOMNode;
 use DOMText;
@@ -49,16 +42,11 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
                 $key = trim($results[0], '%');
 
                 $parent = $node->parentNode;
-
                 foreach ($mapping[$key] as $sentence) {
-
                     $fragment = $parent->ownerDocument->createDocumentFragment();
-
                     $fragment->appendXML($sentence->toDocxXML());
-
                     $parent->insertBefore($fragment, $node);
                 }
-
                 $parent->removeChild($node);
             }
         }
