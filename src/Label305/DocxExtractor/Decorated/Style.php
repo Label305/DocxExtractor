@@ -38,8 +38,12 @@ class Style {
      * @var string|null
      */
     private $spacing;
+    /**
+     * @var string|null
+     */
+    private $highlightColor;
 
-    function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing) {
+    function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highlightColor) {
         $this->rFonts = $rFonts;
         $this->color = $color;
         $this->lang = $lang;
@@ -47,6 +51,7 @@ class Style {
         $this->szCs = $szCs;
         $this->position = $position;
         $this->spacing = $spacing;
+        $this->highlightColor = $highlightColor;
     }
 
     /**
@@ -135,5 +140,13 @@ class Style {
     public function getSpacing()
     {
         return $this->spacing;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getHighlightColor()
+    {
+        return $this->highlightColor;
     }
 }

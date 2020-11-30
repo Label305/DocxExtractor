@@ -297,6 +297,37 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/markings-injected.docx');
     }
 
+    public function testMarkingsWithColorInDocument() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/marking-colored.docx', __DIR__.'/fixtures/marking-colored-extracted.docx');
+
+        $this->assertEquals("Marking", $mapping[0][0]->text); // Marked
+        $this->assertEquals(" in ", $mapping[0][1]->text);
+        $this->assertEquals("other", $mapping[0][2]->text);
+        $this->assertEquals(" color", $mapping[0][3]->text); // Marked
+
+        $mapping[0][0]->text = "Markering"; // Marked
+        $mapping[0][1]->text = " in  ";
+        $mapping[0][2]->text = "andere";
+        $mapping[0][3]->text = " kleur"; // Marked
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/marking-colored-extracted.docx', __DIR__.'/fixtures/marking-colored-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/marking-colored-injected.docx', __DIR__.'/fixtures/marking-colored-injected-extracted.docx');
+
+        $this->assertEquals("Markering", $otherMapping[0][0]->text);
+        $this->assertEquals(" in  ", $otherMapping[0][1]->text);
+        $this->assertEquals("andere", $otherMapping[0][2]->text);
+        $this->assertEquals(" kleur", $otherMapping[0][3]->text);
+
+        unlink(__DIR__.'/fixtures/marking-colored-extracted.docx');
+        unlink(__DIR__.'/fixtures/marking-colored-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/marking-colored-injected.docx');
+    }
+
     public function testGetSuperscriptInDocument() {
 
         $extractor = new DecoratedTextExtractor();

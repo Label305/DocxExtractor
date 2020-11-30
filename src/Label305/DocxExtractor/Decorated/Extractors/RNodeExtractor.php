@@ -85,17 +85,18 @@ class RNodeExtractor implements DecoratedExtractor
                     $szCs = null;
                     $position = null;
                     $spacing = null;
+                    $highLightColor = null;
                     $hasStyle = false;
 
                     foreach ($rChild->childNodes as $propertyNode) {
                         if ($propertyNode instanceof DOMElement) {
-                            $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $hasStyle);
+                            $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $highLightColor, $hasStyle);
                             $this->parseFormatting($propertyNode,$webHidden,$bold,$italic,$underline,$highLight,$superscript,$subscript);
                         }
                     }
 
                     if ($hasStyle) {
-                        $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing);
+                        $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highLightColor);
                     }
                     break;
 
@@ -174,9 +175,10 @@ class RNodeExtractor implements DecoratedExtractor
      * @param string|null $szCs
      * @param string|null $position
      * @param string|null $spacing
+     * @param string|null $highLightColor
      * @param bool $hasStyle
      */
-    protected function parseStyle(DOMElement $propertyNode, &$rFonts, &$color, &$lang, &$sz, &$szCs, &$position, &$spacing, &$hasStyle)
+    protected function parseStyle(DOMElement $propertyNode, &$rFonts, &$color, &$lang, &$sz, &$szCs, &$position, &$spacing, &$highLightColor, &$hasStyle)
     {
         if ($propertyNode->nodeName == "w:rFonts") {
             $rFonts = $propertyNode->getAttribute('w:ascii');
@@ -201,6 +203,9 @@ class RNodeExtractor implements DecoratedExtractor
             $hasStyle = true;
         } elseif ($propertyNode->nodeName == "w:spacing") {
             $spacing = $propertyNode->getAttribute('w:val');
+            $hasStyle = true;
+        } elseif ($propertyNode->nodeName == "w:highlight") {
+            $highLightColor = $propertyNode->getAttribute('w:val');
             $hasStyle = true;
         }
     }
