@@ -421,4 +421,39 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/table-of-contents-injected.docx');
     }
 
+    public function testInlineText(){
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/inline-styling.docx',
+            __DIR__ . '/fixtures/inline-styling-extracted.docx');
+
+
+        $this->assertEquals("This", $mapping[0][0]->text);
+        $this->assertEquals(" is ", $mapping[0][1]->text);
+        $this->assertEquals("decorated ", $mapping[0][2]->text);
+        $this->assertEquals("text", $mapping[0][3]->text);
+
+        $mapping[0][0]->text = "Dit";
+        $mapping[0][1]->text = " is ";
+        $mapping[0][2]->text = "opgemaakte ";
+        $mapping[0][3]->text = "tekst";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/inline-styling-extracted.docx',
+            __DIR__ . '/fixtures/inline-styling-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/inline-styling-injected.docx',
+            __DIR__ . '/fixtures/inline-styling-injected-extracted.docx');
+
+        $this->assertEquals("Dit", $otherMapping[0][0]->text);
+        $this->assertEquals(" is ", $otherMapping[0][1]->text);
+        $this->assertEquals("opgemaakte ", $otherMapping[0][2]->text);
+        $this->assertEquals("tekst", $otherMapping[0][3]->text);
+
+        unlink(__DIR__ . '/fixtures/inline-styling-extracted.docx');
+        unlink(__DIR__ . '/fixtures/inline-styling-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/inline-styling-injected.docx');
+    }
+
 }
