@@ -4,7 +4,7 @@ namespace Label305\DocxExtractor\Decorated\Extractors;
 
 use DOMElement;
 
-class TextBoxExtractor implements DecoratedExtractor
+class TextBoxDOMElementExtractor implements DOMElementExtractor
 {
     /**
      * @param DOMElement $DOMElement

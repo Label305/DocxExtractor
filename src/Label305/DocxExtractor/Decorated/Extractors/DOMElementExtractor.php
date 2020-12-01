@@ -4,11 +4,11 @@ namespace Label305\DocxExtractor\Decorated\Extractors;
 
 use DOMElement;
 
-interface DecoratedExtractor
+interface DOMElementExtractor
 {
     /**
      * @param DOMElement $DOMElement
-     * @return mixed
+     * @return DOMElement
      */
     public function extract(DOMElement $DOMElement);
 }
