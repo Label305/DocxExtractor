@@ -93,8 +93,8 @@ class Sentence {
             $value .= '<w:u w:val="single"/>';
         }
         if ($this->highlight) {
-            if ($this->style !== null && $this->style->getHighlightColor() !== null) {
-                $value .= '<w:highlight w:val="' . $this->style->getHighlightColor() . '"/>';
+            if ($this->style !== null && $this->style->highlightColor !== null) {
+                $value .= '<w:highlight w:val="' . $this->style->highlightColor . '"/>';
             } else {
                 $value .= '<w:highlight w:val="yellow"/>';    
             }

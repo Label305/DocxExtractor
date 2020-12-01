@@ -13,35 +13,35 @@ class Style {
     /**
      * @var string|null
      */
-    private $rFonts;
+    public $rFonts;
     /**
      * @var string|null
      */
-    private $color;
+    public $color;
     /**
      * @var string|null
      */
-    private $lang;
+    public $lang;
     /**
      * @var string|null
      */
-    private $sz;
+    public $sz;
     /**
      * @var string|null
      */
-    private $szCs;
+    public $szCs;
     /**
      * @var string|null
      */
-    private $position;
+    public $position;
     /**
      * @var string|null
      */
-    private $spacing;
+    public $spacing;
     /**
      * @var string|null
      */
-    private $highlightColor;
+    public $highlightColor;
 
     function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highlightColor) {
         $this->rFonts = $rFonts;
@@ -84,69 +84,5 @@ class Style {
             $value .= '<w:spacing w:val="' . $this->spacing . '"/>';
         }
         return $value;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getRFonts()
-    {
-        return $this->rFonts;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getColor()
-    {
-        return $this->color;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getLang()
-    {
-        return $this->lang;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSz()
-    {
-        return $this->sz;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSzCs()
-    {
-        return $this->szCs;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getPosition()
-    {
-        return $this->position;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSpacing()
-    {
-        return $this->spacing;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getHighlightColor()
-    {
-        return $this->highlightColor;
     }
 }
