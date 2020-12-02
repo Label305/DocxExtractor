@@ -8,7 +8,7 @@ use DOMText;
 use Label305\DocxExtractor\Decorated\Sentence;
 use Label305\DocxExtractor\Decorated\Style;
 
-class RNodeExtractor implements DecoratedExtractor
+class RNodeSentenceExtractor implements SentenceExtractor
 {
     /**
      * @param DOMElement $DOMElement

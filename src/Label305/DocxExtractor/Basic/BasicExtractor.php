@@ -22,7 +22,7 @@ class BasicExtractor extends DocxHandler implements Extractor {
      * @param $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
-     * @return Array The mapping of all the strings
+     * @return array The mapping of all the strings
      */
     public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath)
     {

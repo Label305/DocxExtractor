@@ -5,8 +5,8 @@ namespace Label305\DocxExtractor\Decorated;
 use DOMElement;
 use DOMNode;
 use DOMText;
-use Label305\DocxExtractor\Decorated\Extractors\RNodeExtractor;
-use Label305\DocxExtractor\Decorated\Extractors\TextBoxExtractor;
+use Label305\DocxExtractor\Decorated\Extractors\RNodeSentenceExtractor;
+use Label305\DocxExtractor\Decorated\Extractors\TextBoxDOMElementExtractor;
 use Label305\DocxExtractor\DocxFileException;
 use Label305\DocxExtractor\DocxHandler;
 use Label305\DocxExtractor\DocxParsingException;
@@ -74,31 +74,31 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     }
 
     /**
-     * @param DOMNode $paragraph
+     * @param DOMNode $DOMNode
      * @param $result
      * @return array
      */
-    protected function replaceAndMapValuesForParagraph(DOMNode $paragraph, &$result)
+    protected function replaceAndMapValuesForParagraph(DOMNode $DOMNode, &$result)
     {
-        if ($paragraph->childNodes !== null) {
+        if ($DOMNode->childNodes !== null) {
 
             $firstTextChild = null;
             $otherNodes = [];
             $parts = new Paragraph();
 
-            foreach ($paragraph->childNodes as $paragraphChild) {
-                if ($paragraphChild instanceof DOMElement && in_array($paragraphChild->nodeName, [
+            foreach ($DOMNode->childNodes as $DOMNodeChild) {
+                if ($DOMNodeChild instanceof DOMElement && in_array($DOMNodeChild->nodeName, [
                     "w:r",
                     "w:hyperlink",
                     "w:smartTag",
                 ])) {
 
                     // Additional loops for specific elements
-                    if ($paragraphChild->childNodes !== null) {
-                        foreach ($paragraphChild->childNodes as $childNode) {
+                    if ($DOMNodeChild->childNodes !== null) {
+                        foreach ($DOMNodeChild->childNodes as $childNode) {
                             switch ($childNode->nodeName) {
                                 case "mc:AlternateContent" :
-                                    $textBoxChild = (new TextBoxExtractor())->extract($childNode);
+                                    $textBoxChild = (new TextBoxDOMElementExtractor())->extract($childNode);
                                     if ($textBoxChild !== null) {
                                         $this->replaceAndMapValuesForParagraph($textBoxChild, $result);
                                     }
@@ -110,30 +110,30 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     }
 
                     // Parse results
-                    $paragraphParts = (new RNodeExtractor())->extract($paragraphChild);
-                    if (count($paragraphParts) !== 0) {
-                        foreach ($paragraphParts as $paragraphPart) {
-                            $parts[] = $paragraphPart;
+                    $sentences = (new RNodeSentenceExtractor())->extract($DOMNodeChild);
+                    if (count($sentences) !== 0) {
+                        foreach ($sentences as $sentence) {
+                            $parts[] = $sentence;
                         }
                         if ($firstTextChild === null) {
-                            $firstTextChild = $paragraphChild;
+                            $firstTextChild = $DOMNodeChild;
                         } else {
-                            $otherNodes[] = $paragraphChild;
+                            $otherNodes[] = $DOMNodeChild;
                         }
                     }
 
-                } elseif ($paragraphChild instanceof DOMElement) {
-                    $this->replaceAndMapValuesForParagraph($paragraphChild, $result);
+                } elseif ($DOMNodeChild instanceof DOMElement) {
+                    $this->replaceAndMapValuesForParagraph($DOMNodeChild, $result);
                 }
             }
 
             if ($firstTextChild !== null) {
                 $replacementNode = new DOMText();
                 $replacementNode->nodeValue = "%" . $this->nextTagIdentifier . "%";
-                $paragraph->replaceChild($replacementNode, $firstTextChild);
+                $DOMNode->replaceChild($replacementNode, $firstTextChild);
 
                 foreach ($otherNodes as $otherNode) {
-                    $paragraph->removeChild($otherNode);
+                    $DOMNode->removeChild($otherNode);
                 }
 
                 $result[$this->nextTagIdentifier] = $parts;
