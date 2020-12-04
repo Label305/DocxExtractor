@@ -136,14 +136,12 @@ class Sentence {
      * @param bool $firstWrappedInHighlight
      * @param bool $firstWrappedInSuperscript
      * @param bool $firstWrappedInSubscript
-     * @param bool $firstWrappedInStyle
      * @param bool $lastWrappedInBold
      * @param bool $lastWrappedInItalic
      * @param bool $lastWrappedInUnderline
      * @param bool $lastWrappedInHighlight
      * @param bool $lastWrappedInSuperscript
      * @param bool $lastWrappedInSubscript
-     * @param bool $lastWrappedInStyle
      * @return string HTML string
      */
     public function toHTML(
@@ -153,14 +151,12 @@ class Sentence {
         $firstWrappedInHighlight = true,
         $firstWrappedInSuperscript = true,
         $firstWrappedInSubscript = true,
-        $firstWrappedInStyle = true,
         $lastWrappedInBold = true,
         $lastWrappedInItalic = true,
         $lastWrappedInUnderline = true,
         $lastWrappedInHighlight = true,
         $lastWrappedInSuperscript = true,
-        $lastWrappedInSubscript = true,
-        $lastWrappedInStyle = true
+        $lastWrappedInSubscript = true
     )
     {
         $value = '';
@@ -187,13 +183,27 @@ class Sentence {
         if ($this->superscript && $firstWrappedInSuperscript) {
             $value .= "<sup>";
         }
-        if ($this->style !== null && $firstWrappedInStyle) {
+        if ($this->style !== null &&
+            !$this->highlight &&
+            !$this->bold &&
+            !$this->italic &&
+            !$this->underline &&
+            !$this->subscript &&
+            !$this->superscript
+        ) {
             $value .= "<font>";
         }
 
         $value .= htmlentities($this->text);
 
-        if ($this->style !== null && $lastWrappedInStyle) {
+        if ($this->style !== null &&
+            !$this->highlight &&
+            !$this->bold &&
+            !$this->italic &&
+            !$this->underline &&
+            !$this->subscript &&
+            !$this->superscript
+        ) {
             $value .= "</font>";
         }
         if ($this->superscript && $lastWrappedInSuperscript) {
