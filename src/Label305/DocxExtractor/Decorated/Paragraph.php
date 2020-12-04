@@ -127,11 +127,11 @@ class Paragraph extends ArrayObject
             // Sometimes we extract a single space, but in the Paragraph the space is at the beginning of the sentence
             $startsWithSpace = strlen($node->nodeValue) > strlen(ltrim($node->nodeValue));
             if ($startsWithSpace && strlen(ltrim($originalParagraph[$this->nextTagIdentifier]->text)) === 0) {
-                // When the current paragraph has no lengt it may be the space at the beginning
-                $this->nextTagIdentifier++;
-                // Return the next paragraph style
-                if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
-                    $originalStyle = $originalParagraph[$this->nextTagIdentifier]->style;
+                // When the current paragraph has no length it may be the space at the beginning
+                if (array_key_exists($this->nextTagIdentifier + 1, $originalParagraph)) {
+                    // Add the next paragraph style
+                    $originalStyle = $originalParagraph[$this->nextTagIdentifier + 1]->style;
+                    $this->nextTagIdentifier++;
                 }
             } else {
                 $originalStyle = $originalParagraph[$this->nextTagIdentifier]->style;
@@ -155,7 +155,6 @@ class Paragraph extends ArrayObject
         $highlightActive = false;
         $superscriptActive = false;
         $subscriptActive = false;
-        $styleActive = false;
 
         for ($i = 0; $i < count($this); $i++) {
 
@@ -197,12 +196,6 @@ class Paragraph extends ArrayObject
                 $openSubscript = true;
             }
 
-            $openStyle = false;
-            if ($sentence->style !== null && !$styleActive) {
-                $styleActive = true;
-                $openStyle = true;
-            }
-
             $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
             $closeBold = false;
             if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
@@ -240,15 +233,9 @@ class Paragraph extends ArrayObject
                 $closeSubscript = true;
             }
 
-            $closeStyle = false;
-            if ($nextSentence === null || ($nextSentence->style === null && $styleActive)) {
-                $styleActive = false;
-                $closeStyle = true;
-            }
-
             $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $openSuperscript,
-                $openSubscript, $openStyle, $closeBold, $closeItalic, $closeUnderline, $closeHighlight, $closeSuperscript,
-                $closeSubscript, $closeStyle);
+                $openSubscript, $closeBold, $closeItalic, $closeUnderline, $closeHighlight, $closeSuperscript,
+                $closeSubscript);
         }
 
         return $result;
