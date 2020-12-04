@@ -5,6 +5,7 @@ use Label305\DocxExtractor\Basic\BasicInjector;
 use Label305\DocxExtractor\Decorated\DecoratedTextExtractor;
 use Label305\DocxExtractor\Decorated\DecoratedTextInjector;
 use Label305\DocxExtractor\Decorated\Paragraph;
+use Label305\DocxExtractor\Decorated\Sentence;
 
 class ExtractionTest extends TestCase {
 
@@ -486,6 +487,85 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__ . '/fixtures/inline-styling-extracted.docx');
         unlink(__DIR__ . '/fixtures/inline-styling-injected-extracted.docx');
         unlink(__DIR__ . '/fixtures/inline-styling-injected.docx');
+    }
+
+    public function test_paragraph_toHtml()
+    {
+        $paragraph = new Paragraph();
+        $paragraph[] = new Sentence('This is a test with ');
+        $paragraph[] = new Sentence('bold' , true);
+        $paragraph[] = new Sentence(' and ');
+        $paragraph[] = new Sentence('italic' , false, true);
+        $paragraph[] = new Sentence(' and ');
+        $paragraph[] = new Sentence('underline' , false, false, true);
+        $paragraph[] = new Sentence(' and ');
+        $paragraph[] = new Sentence('highlight' , false, false, false, 0, true);
+        $paragraph[] = new Sentence(' and ');
+        $paragraph[] = new Sentence('superscript' , false, false, false, 0, false, true);
+        $paragraph[] = new Sentence(' and ');
+        $paragraph[] = new Sentence('subscript' , false, false, false, 0, false, false, true);
+
+        $this->assertEquals('This is a test with <strong>bold</strong> and <em>italic</em> and <u>underline</u> and <mark>highlight</mark> and <sup>superscript</sup> and <sub>subscript</sub>', $paragraph->toHTML());
+    }
+
+    public function test_paragraph_fillWithHTMLDom()
+    {
+        $html = 'This is a test with <strong>bold</strong> and <em>italic</em> and <u>underline</u> and <mark>highlight</mark> and <sup>superscript</sup> and <sub>subscript</sub>';
+        $html = "<html>" . $html . "</html>";
+
+        $htmlDom = new DOMDocument;
+        @$htmlDom->loadXml($html);
+
+        $paragraph = new Paragraph();
+        $paragraph->fillWithHTMLDom($htmlDom->documentElement, null);
+
+        $this->assertEquals('This is a test with ', $paragraph[0]->text);
+        $this->assertEquals('bold', $paragraph[1]->text);
+        $this->assertTrue($paragraph[1]->bold);
+        $this->assertEquals(' and ', $paragraph[2]->text);
+        $this->assertEquals('italic', $paragraph[3]->text);
+        $this->assertTrue($paragraph[3]->italic);
+        $this->assertEquals(' and ', $paragraph[4]->text);
+        $this->assertEquals('underline', $paragraph[5]->text);
+        $this->assertTrue($paragraph[5]->underline);
+        $this->assertEquals(' and ', $paragraph[6]->text);
+        $this->assertEquals('highlight', $paragraph[7]->text);
+        $this->assertTrue($paragraph[7]->highlight);
+        $this->assertEquals(' and ', $paragraph[8]->text);
+        $this->assertEquals('superscript', $paragraph[9]->text);
+        $this->assertTrue($paragraph[9]->superscript);
+        $this->assertEquals(' and ', $paragraph[10]->text);
+        $this->assertEquals('subscript', $paragraph[11]->text);
+        $this->assertTrue($paragraph[11]->subscript);
+    }
+
+    public function test_paragraphWithHTML()
+    {
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__. '/fixtures/inline-styling.docx', __DIR__. '/fixtures/inline-styling-extracted.docx');
+
+        $translations = [
+            'Dit<font> is </font><font>opgemaakte </font><font>tekst</font>',
+        ];
+
+        foreach ($translations as $key => $translation) {
+            $mapping[$key] = Paragraph::paragraphWithHTML($translation, $mapping[$key]);
+        }
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__. '/fixtures/inline-styling-extracted.docx', __DIR__. '/fixtures/inline-styling-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__. '/fixtures/inline-styling-injected.docx', __DIR__. '/fixtures/inline-styling-injected-extracted.docx');
+
+        $this->assertEquals('Dit', $otherMapping[0][0]->text);
+        $this->assertEquals(' is ', $otherMapping[0][1]->text);
+        $this->assertEquals('opgemaakte ', $otherMapping[0][2]->text);
+        $this->assertEquals('tekst', $otherMapping[0][3]->text);
+
+        unlink(__DIR__.'/fixtures/inline-styling-extracted.docx');
+        unlink(__DIR__.'/fixtures/inline-styling-injected-extracted.docx');
+        unlink(__DIR__.'/fixtures/inline-styling-injected.docx');
     }
 
 }
