@@ -157,8 +157,7 @@ class Sentence {
         $lastWrappedInHighlight = true,
         $lastWrappedInSuperscript = true,
         $lastWrappedInSubscript = true
-    )
-    {
+    ) {
         $value = '';
 
         for ($i = 0; $i < $this->br; $i++) {
@@ -184,6 +183,7 @@ class Sentence {
             $value .= "<sup>";
         }
         if ($this->style !== null &&
+            !$this->style->isEmpty() &&
             !$this->highlight &&
             !$this->bold &&
             !$this->italic &&
@@ -197,6 +197,7 @@ class Sentence {
         $value .= htmlentities($this->text);
 
         if ($this->style !== null &&
+            !$this->style->isEmpty() &&
             !$this->highlight &&
             !$this->bold &&
             !$this->italic &&
