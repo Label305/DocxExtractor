@@ -56,8 +56,17 @@ class Sentence {
     public $style;
 
 
-    function __construct($text, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript, $style = null)
-    {
+    function __construct(
+        $text,
+        $bold = false,
+        $italic = false,
+        $underline = false,
+        $br = false,
+        $highlight = false,
+        $superscript = false,
+        $subscript = false,
+        $style = null
+    ) {
         $this->text = $text;
         $this->bold = $bold;
         $this->italic = $italic;

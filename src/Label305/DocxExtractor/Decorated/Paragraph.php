@@ -14,6 +14,10 @@ use DOMText;
  */
 class Paragraph extends ArrayObject
 {
+    /**
+     * @var int
+     */
+    protected $nextTagIdentifier = 0;
 
     /**
      * Conenience constructor for the user of the API
@@ -21,7 +25,7 @@ class Paragraph extends ArrayObject
      * @param $html string
      * @return Paragraph
      */
-    public static function paragraphWithHTML($html)
+    public static function paragraphWithHTML($html, Paragraph $originalParagraph = null)
     {
         $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u><mark><sub><sup>') . "</html>";
         $html = str_replace("<br>", "<br />", $html);
@@ -31,7 +35,7 @@ class Paragraph extends ArrayObject
 
         $paragraph = new Paragraph();
         if ($htmlDom->documentElement !== null) {
-            $paragraph->fillWithHTMLDom($htmlDom->documentElement);
+            $paragraph->fillWithHTMLDom($htmlDom->documentElement, $originalParagraph);
         }
 
         return $paragraph;
@@ -41,6 +45,7 @@ class Paragraph extends ArrayObject
      * Recursive method to fill paragraph from HTML data
      *
      * @param DOMNode $node
+     * @param Paragraph|null $originalParagraph
      * @param int $br
      * @param bool $bold
      * @param bool $italic
@@ -51,6 +56,7 @@ class Paragraph extends ArrayObject
      */
     public function fillWithHTMLDom(
         DOMNode $node,
+        Paragraph $originalParagraph = null,
         $br = 0,
         $bold = false,
         $italic = false,
@@ -61,8 +67,11 @@ class Paragraph extends ArrayObject
     ) {
         if ($node instanceof DOMText) {
 
-            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight, $superscript,
-                $subscript);
+            $originalStyle = null;
+            if ($originalParagraph !== null) {
+                $originalStyle = $this->getOriginalStyle($node, $originalParagraph);
+            }
+            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript, $originalStyle);
 
         } else {
             if ($node->childNodes !== null) {
@@ -91,13 +100,38 @@ class Paragraph extends ArrayObject
                     if ($child->nodeName == 'br') {
                         $br++;
                     } else {
-                        $this->fillWithHTMLDom($child, $br, $bold, $italic, $underline, $highlight, $superscript,
+                        $this->fillWithHTMLDom($child, $originalParagraph, $br, $bold, $italic, $underline, $highlight, $superscript,
                             $subscript);
                         $br = 0;
                     }
                 }
             }
         }
+    }
+
+    /**
+     * @param DOMText $node
+     * @param Paragraph $originalParagraph
+     * @return Style|null
+     */
+    private function getOriginalStyle(DOMText $node, Paragraph $originalParagraph)
+    {
+        $originalStyle = null;
+        if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
+            // Sometimes we extract a single space, but in the Paragraph the space is at the beginning of the sentence
+            $startsWithSpace = strlen($node->nodeValue) > strlen(ltrim($node->nodeValue));
+            if ($startsWithSpace) {
+                if (strlen(ltrim($originalParagraph[$this->nextTagIdentifier]->text)) === 0) {
+                    $this->nextTagIdentifier++;
+                    if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
+                        return $originalParagraph[$this->nextTagIdentifier]->style;
+                    }
+                }
+            } else {
+                return $originalParagraph[$this->nextTagIdentifier]->style;
+            }
+        }
+        return null;
     }
 
     /**
