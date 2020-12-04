@@ -545,7 +545,7 @@ class ExtractionTest extends TestCase {
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__. '/fixtures/inline-styling.docx', __DIR__. '/fixtures/inline-styling-extracted.docx');
 
         $translations = [
-            'Dit is opgemaakte tekst',
+            'Dit<font> is </font><font>opgemaakte </font><font>tekst</font>',
         ];
 
         foreach ($translations as $key => $translation) {
@@ -558,7 +558,10 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__. '/fixtures/inline-styling-injected.docx', __DIR__. '/fixtures/inline-styling-injected-extracted.docx');
 
-        $this->assertEquals('Dit is opgemaakte tekst', $otherMapping[0][0]->text);
+        $this->assertEquals('Dit', $otherMapping[0][0]->text);
+        $this->assertEquals(' is ', $otherMapping[0][1]->text);
+        $this->assertEquals('opgemaakte ', $otherMapping[0][2]->text);
+        $this->assertEquals('tekst', $otherMapping[0][3]->text);
 
         unlink(__DIR__.'/fixtures/inline-styling-extracted.docx');
         unlink(__DIR__.'/fixtures/inline-styling-injected-extracted.docx');
