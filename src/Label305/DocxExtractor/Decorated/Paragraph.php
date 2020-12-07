@@ -215,8 +215,9 @@ class Paragraph extends ArrayObject
             $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
 
             $closeFont = false;
-            if (($nextSentence === null || $nextSentence->style !== null && !$nextSentence->style->isEmpty()) && $fontIsActive) {
+            if ($fontIsActive) {
                 $closeFont = true;
+                $fontIsActive = false;
             }
             
             $closeBold = false;
