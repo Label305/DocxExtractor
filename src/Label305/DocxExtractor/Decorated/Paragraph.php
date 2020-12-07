@@ -150,6 +150,7 @@ class Paragraph extends ArrayObject
         $result = '';
 
         $boldIsActive = false;
+        $fontIsActive = false;
         $italicIsActive = false;
         $underlineIsActive = false;
         $highlightActive = false;
@@ -159,6 +160,18 @@ class Paragraph extends ArrayObject
         for ($i = 0; $i < count($this); $i++) {
 
             $sentence = $this[$i];
+            $openFont = false;
+            if ($sentence->style !== null && !$sentence->style->isEmpty() &&
+                !$fontIsActive &&
+                !$italicIsActive &&
+                !$underlineIsActive &&
+                !$highlightActive &&
+                !$superscriptActive &&
+                !$subscriptActive &&
+                count($this) > 1
+            ) {
+                $openFont = true;
+            }
 
             $openBold = false;
             if ($sentence->bold && !$boldIsActive) {
@@ -233,9 +246,14 @@ class Paragraph extends ArrayObject
                 $closeSubscript = true;
             }
 
+            $closeFont = false;
+            if (($nextSentence === null || $nextSentence->style !== null && !$nextSentence->style->isEmpty()) && $fontIsActive) {
+                $closeFont = true;
+            }
+
             $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $openSuperscript,
-                $openSubscript, $closeBold, $closeItalic, $closeUnderline, $closeHighlight, $closeSuperscript,
-                $closeSubscript);
+                $openSubscript, $openFont, $closeBold, $closeItalic, $closeUnderline, $closeHighlight, $closeSuperscript,
+                $closeSubscript, $closeFont);
         }
 
         return $result;

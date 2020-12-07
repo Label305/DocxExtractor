@@ -466,6 +466,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals("decorated ", $mapping[0][2]->text);
         $this->assertEquals("text", $mapping[0][3]->text);
 
+
         $mapping[0][0]->text = "Dit";
         $mapping[0][1]->text = " is ";
         $mapping[0][2]->text = "opgemaakte ";
