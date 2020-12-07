@@ -569,4 +569,47 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/inline-styling-injected.docx');
     }
 
+    public function testTrackChanges(){
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/changes.docx',
+            __DIR__ . '/fixtures/changes-extracted.docx');
+
+        $this->assertEquals("A.", $mapping[0][0]->text);
+        $this->assertEquals("Opdrachtgever", $mapping[0][2]->text);
+        $this->assertEquals(" ten behoeve van ", $mapping[0][3]->text);
+        $this->assertEquals("de advisering en/of ontwikkeling van software", $mapping[0][4]->text);
+        $this->assertEquals(" de expertise van ", $mapping[0][5]->text);
+        $this->assertEquals("ABC", $mapping[0][6]->text);
+        $this->assertEquals("wil inzetten;", $mapping[0][8]->text);
+
+        $mapping[0][0]->text = "A.";
+        $mapping[0][2]->text = "Client";
+        $mapping[0][3]->text = " for the purpose of ";
+        $mapping[0][4]->text = "the advice and / or development of software";
+        $mapping[0][5]->text = " the expertise ";
+        $mapping[0][6]->text = "ABS";
+        $mapping[0][8]->text = "wants to bet;";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/changes-extracted.docx',
+            __DIR__ . '/fixtures/changes-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/changes-injected.docx',
+            __DIR__ . '/fixtures/changes-injected-extracted.docx');
+
+        $this->assertEquals("A.", $otherMapping[0][0]->text);
+        $this->assertEquals("Client", $otherMapping[0][2]->text);
+        $this->assertEquals(" for the purpose of ", $otherMapping[0][3]->text);
+        $this->assertEquals("the advice and / or development of software", $otherMapping[0][4]->text);
+        $this->assertEquals(" the expertise ", $otherMapping[0][5]->text);
+        $this->assertEquals("ABS", $otherMapping[0][6]->text);
+        $this->assertEquals("wants to bet;", $otherMapping[0][8]->text);
+
+        unlink(__DIR__ . '/fixtures/changes-extracted.docx');
+        unlink(__DIR__ . '/fixtures/changes-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/changes-injected.docx');
+    }
+
 }
