@@ -160,18 +160,6 @@ class Paragraph extends ArrayObject
         for ($i = 0; $i < count($this); $i++) {
 
             $sentence = $this[$i];
-            $openFont = false;
-            if ($sentence->style !== null && !$sentence->style->isEmpty() &&
-                !$fontIsActive &&
-                !$italicIsActive &&
-                !$underlineIsActive &&
-                !$highlightActive &&
-                !$superscriptActive &&
-                !$subscriptActive &&
-                count($this) > 1
-            ) {
-                $openFont = true;
-            }
 
             $openBold = false;
             if ($sentence->bold && !$boldIsActive) {
@@ -209,7 +197,28 @@ class Paragraph extends ArrayObject
                 $openSubscript = true;
             }
 
+            $openFont = false;
+            if ($sentence->style !== null && !$sentence->style->isEmpty() &&
+                !$boldIsActive &&
+                !$fontIsActive &&
+                !$italicIsActive &&
+                !$underlineIsActive &&
+                !$highlightActive &&
+                !$superscriptActive &&
+                !$subscriptActive &&
+                count($this) > 1
+            ) {
+                $openFont = true;
+                $fontIsActive = true;
+            }
+
             $nextSentence = ($i + 1 < count($this)) ? $this[$i + 1] : null;
+
+            $closeFont = false;
+            if (($nextSentence === null || $nextSentence->style !== null && !$nextSentence->style->isEmpty()) && $fontIsActive) {
+                $closeFont = true;
+            }
+            
             $closeBold = false;
             if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
                 $boldIsActive = false;
@@ -244,11 +253,6 @@ class Paragraph extends ArrayObject
             if ($nextSentence === null || (!$nextSentence->subscript && $subscriptActive)) {
                 $subscriptActive = false;
                 $closeSubscript = true;
-            }
-
-            $closeFont = false;
-            if (($nextSentence === null || $nextSentence->style !== null && !$nextSentence->style->isEmpty()) && $fontIsActive) {
-                $closeFont = true;
             }
 
             $result .= $sentence->toHTML($openBold, $openItalic, $openUnderline, $openHighlight, $openSuperscript,
