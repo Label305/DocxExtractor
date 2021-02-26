@@ -24,6 +24,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
         $italic = false;
         $underline = false;
         $brCount = 0;
+        $tabCount = 0;
         $highLight = false;
         $superscript = false;
         $subscript = false;
@@ -50,7 +51,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
         }
 
         foreach ($DOMElement->childNodes as $rChild) {
-            $this->parseChildNode($rChild, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
+            $this->parseChildNode($rChild, $result, $webHidden, $bold, $italic, $underline, $brCount, $tabCount, $highLight,
                 $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel
             );
         }
@@ -84,6 +85,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
         &$italic,
         &$underline,
         &$brCount,
+        &$tabCount,
         &$highLight,
         &$superscript,
         &$subscript,
@@ -99,12 +101,15 @@ class RNodeSentenceExtractor implements SentenceExtractor
                 case "w:p" :
                 case "w:r" :
                 case "w:smartTag" :
-                    $rsidR =  $rChild->getAttribute('w:rsidR');
-                    $rsidDel =  $rChild->getAttribute('w:rsidDel');
+
+                    $rsidR = $rChild->getAttribute('w:rsidR');
+                    $rsidDel = $rChild->getAttribute('w:rsidDel');
 
                     foreach ($rChild->childNodes as $propertyNode) {
-                        $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                            $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel);
+                        $this->parseChildNode($propertyNode,  $result, $webHidden, $bold, $italic,
+                            $underline, $brCount, $tabCount, $highLight, $superscript,
+                            $subscript, $text, $style, $insertion, $deletion, $rsidR,
+                            $rsidDel);
                     }
                     break;
 
@@ -132,12 +137,12 @@ class RNodeSentenceExtractor implements SentenceExtractor
                     break;
 
                 case "w:t" :
+                    $text = implode(" ", $this->parseText($rChild));
+                    break;
+
                 case "w:tab" :
-                    if ($rChild->nodeName == "w:tab") {
-                        $text = " ";
-                    } else {
-                        $text = implode(" ", $this->parseText($rChild));
-                    }
+                    $text = " ";
+                    $tabCount++;
                     break;
 
                 case "w:br" :
@@ -148,7 +153,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
 
         if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
 
-            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel);
+            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $tabCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel);
 
             // Reset
             $brCount = 0;

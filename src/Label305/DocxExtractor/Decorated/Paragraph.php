@@ -74,7 +74,7 @@ class Paragraph extends ArrayObject
             if ($originalParagraph !== null) {
                 $originalStyle = $this->getOriginalStyle($node, $originalParagraph);
             }
-            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, $highlight, $superscript, $subscript, $originalStyle);
+            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, 0, $highlight, $superscript, $subscript, $originalStyle);
             $this->nextTagIdentifier++;
 
         } else {

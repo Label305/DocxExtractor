@@ -500,11 +500,11 @@ class ExtractionTest extends TestCase {
         $paragraph[] = new Sentence(' and ');
         $paragraph[] = new Sentence('underline' , false, false, true);
         $paragraph[] = new Sentence(' and ');
-        $paragraph[] = new Sentence('highlight' , false, false, false, 0, true);
+        $paragraph[] = new Sentence('highlight' , false, false, false, 0, 0,true);
         $paragraph[] = new Sentence(' and ');
-        $paragraph[] = new Sentence('superscript' , false, false, false, 0, false, true);
+        $paragraph[] = new Sentence('superscript' , false, false, false, 0,0, false, true);
         $paragraph[] = new Sentence(' and ');
-        $paragraph[] = new Sentence('subscript' , false, false, false, 0, false, false, true);
+        $paragraph[] = new Sentence('subscript' , false, false, false, 0, 0,false, false, true);
 
         $this->assertEquals('This is a test with <strong>bold</strong> and <em>italic</em> and <u>underline</u> and <mark>highlight</mark> and <sup>superscript</sup> and <sub>subscript</sub>', $paragraph->toHTML());
     }
@@ -569,7 +569,7 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__.'/fixtures/inline-styling-injected.docx');
     }
 
-    public function testTrackChanges(){
+    public function testTrackChanges() {
 
         $extractor = new DecoratedTextExtractor();
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/changes.docx',
@@ -602,17 +602,44 @@ class ExtractionTest extends TestCase {
             __DIR__ . '/fixtures/changes-injected-extracted.docx');
 
         $this->assertEquals("A.", $otherMapping[0][0]->text);
-        $this->assertEquals("Client", $otherMapping[0][2]->text);
-        $this->assertEquals(" for the purpose of ", $otherMapping[0][3]->text);
-        $this->assertEquals("the advice and / or development of software", $otherMapping[0][4]->text);
-        $this->assertEquals(" the expertise ", $otherMapping[0][5]->text);
-        $this->assertEquals("ABS", $otherMapping[0][6]->text);
-        $this->assertEquals("wants to bet;", $otherMapping[0][8]->text);
-        $this->assertEquals("This is the ", $otherMapping[1][2]->text);
+        $this->assertEquals("Client", $otherMapping[0][3]->text);
+        $this->assertEquals(" for the purpose of ", $otherMapping[0][4]->text);
+        $this->assertEquals("the advice and / or development of software", $otherMapping[0][5]->text);
+        $this->assertEquals(" the expertise ", $otherMapping[0][6]->text);
+        $this->assertEquals("ABS", $otherMapping[0][7]->text);
+        $this->assertEquals("wants to bet;", $otherMapping[0][9]->text);
+        $this->assertEquals("This is the ", $otherMapping[1][4]->text);
 
         unlink(__DIR__ . '/fixtures/changes-extracted.docx');
         unlink(__DIR__ . '/fixtures/changes-injected-extracted.docx');
         unlink(__DIR__ . '/fixtures/changes-injected.docx');
+    }
+
+    public function testTabs() {
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/tabs.docx',
+            __DIR__ . '/fixtures/tabs-extracted.docx');
+
+        $this->assertEquals("ENERGIE ", $mapping[0][0]->text);
+        $this->assertEquals(1, $mapping[0][4]->tab);
+
+        $mapping[0][0]->text = "ENERGY ";
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/tabs-extracted.docx',
+            __DIR__ . '/fixtures/tabs-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/tabs-injected.docx',
+            __DIR__ . '/fixtures/tabs-injected-extracted.docx');
+
+        $this->assertEquals("ENERGY ", $otherMapping[0][0]->text);
+        $this->assertEquals(1, $otherMapping[0][4]->tab);
+
+        unlink(__DIR__ . '/fixtures/tabs-extracted.docx');
+        unlink(__DIR__ . '/fixtures/tabs-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/tabs-injected.docx');
     }
 
 }
