@@ -103,7 +103,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                                     }
                                     break;
                                 default :
-                                    $this->replaceAndMapValuesForParagraph($childNode, $result);
                                     break;
                             }
                         }
