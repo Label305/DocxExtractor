@@ -41,7 +41,7 @@ class Sentence {
     public $superscript;
 
     /**
-     * @var bool If sentence is subscriot or not
+     * @var bool If sentence is subscript or not
      */
     public $subscript;
 
@@ -49,6 +49,11 @@ class Sentence {
      * @var int Number of line breaks
      */
     public $br;
+
+    /**
+     * @var int Number of tabs
+     */
+    public $tab;
 
     /**
      * @var Style|null
@@ -81,7 +86,8 @@ class Sentence {
         $bold = false,
         $italic = false,
         $underline = false,
-        $br = false,
+        $br = 0,
+        $tab = 0,
         $highlight = false,
         $superscript = false,
         $subscript = false,
@@ -96,6 +102,7 @@ class Sentence {
         $this->italic = $italic;
         $this->underline = $underline;
         $this->br = $br;
+        $this->tab = $tab;
         $this->highlight = $highlight;
         $this->superscript = $superscript;
         $this->subscript = $subscript;
@@ -129,6 +136,7 @@ class Sentence {
         }
 
         $value .= '<w:rPr>';
+
         if ($this->style !== null) {
             $value .= $this->style->toDocxXML();
         }
@@ -145,7 +153,7 @@ class Sentence {
             if ($this->style !== null && $this->style->highlightColor !== null) {
                 $value .= '<w:highlight w:val="' . $this->style->highlightColor . '"/>';
             } else {
-                $value .= '<w:highlight w:val="yellow"/>';    
+                $value .= '<w:highlight w:val="yellow"/>';
             }
         }
         if ($this->superscript) {
@@ -160,8 +168,12 @@ class Sentence {
         for ($i = 0; $i < $this->br; $i++) {
             $value .= "<w:br/>";
         }
+        for ($i = 0; $i < $this->tab; $i++) {
+            $value .= "<w:tab/>";
+        }
 
         $value .= '<w:t xml:space="preserve">' . htmlentities($this->text, ENT_XML1) . "</w:t></w:r>";
+
         if ($this->deletion !== null) {
             $value .= '</w:del>';
         }
