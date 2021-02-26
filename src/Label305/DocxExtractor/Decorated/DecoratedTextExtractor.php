@@ -58,7 +58,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     }
                 }
             }
-
         } else {
             if ($node->childNodes !== null) {
                 foreach ($node->childNodes as $child) {
@@ -93,7 +92,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     "w:hyperlink",
                     "w:smartTag",
                 ])) {
-
                     // Additional loops for specific elements
                     if ($DOMNodeChild->childNodes !== null) {
                         foreach ($DOMNodeChild->childNodes as $childNode) {

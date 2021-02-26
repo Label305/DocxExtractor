@@ -55,6 +55,26 @@ class Sentence {
      */
     public $style;
 
+    /**
+     * @var Insertion|null
+     */
+    public $insertion;
+
+    /**
+     * @var Deletion|null
+     */
+    public $deletion;
+
+    /**
+     * @var string|null
+     */
+    public $rsidR;
+
+    /**
+     * @var string|null
+     */
+    public $rsidDel;
+
 
     function __construct(
         $text,
@@ -65,7 +85,11 @@ class Sentence {
         $highlight = false,
         $superscript = false,
         $subscript = false,
-        $style = null
+        $style = null,
+        $insertion = null,
+        $deletion = null,
+        $rsidR = null,
+        $rsidDel = null
     ) {
         $this->text = $text;
         $this->bold = $bold;
@@ -76,6 +100,10 @@ class Sentence {
         $this->superscript = $superscript;
         $this->subscript = $subscript;
         $this->style = $style;
+        $this->insertion = $insertion;
+        $this->deletion = $deletion;
+        $this->rsidR = $rsidR;
+        $this->rsidDel = $rsidDel;
     }
 
     /**
@@ -85,7 +113,21 @@ class Sentence {
      */
     public function toDocxXML()
     {
-        $value = '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        $value = '';
+        if ($this->insertion) {
+            $value .= $this->insertion->toDocxXML();
+        }
+        if ($this->deletion) {
+            $value .= $this->deletion->toDocxXML();
+        }
+        if ($this->rsidR !== null) {
+            $value .= '<w:r w:rsidR="' . $this->rsidR . '" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        } elseif ($this->rsidDel !== null) {
+            $value .= '<w:r w:rsidDel="' . $this->rsidDel . '" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        } else {
+            $value .= '<w:r xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
+        }
+
         $value .= '<w:rPr>';
         if ($this->style !== null) {
             $value .= $this->style->toDocxXML();
@@ -120,6 +162,12 @@ class Sentence {
         }
 
         $value .= '<w:t xml:space="preserve">' . htmlentities($this->text, ENT_XML1) . "</w:t></w:r>";
+        if ($this->deletion !== null) {
+            $value .= '</w:del>';
+        }
+        if ($this->insertion !== null) {
+            $value .= '</w:ins>';
+        }
 
         return $value;
     }

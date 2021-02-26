@@ -582,6 +582,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals(" de expertise van ", $mapping[0][5]->text);
         $this->assertEquals("ABC", $mapping[0][6]->text);
         $this->assertEquals("wil inzetten;", $mapping[0][8]->text);
+        $this->assertEquals("Dit is de ", $mapping[1][2]->text);
 
         $mapping[0][0]->text = "A.";
         $mapping[0][2]->text = "Client";
@@ -590,6 +591,7 @@ class ExtractionTest extends TestCase {
         $mapping[0][5]->text = " the expertise ";
         $mapping[0][6]->text = "ABS";
         $mapping[0][8]->text = "wants to bet;";
+        $mapping[1][2]->text = "This is the ";
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/changes-extracted.docx',
@@ -606,6 +608,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals(" the expertise ", $otherMapping[0][5]->text);
         $this->assertEquals("ABS", $otherMapping[0][6]->text);
         $this->assertEquals("wants to bet;", $otherMapping[0][8]->text);
+        $this->assertEquals("This is the ", $otherMapping[1][2]->text);
 
         unlink(__DIR__ . '/fixtures/changes-extracted.docx');
         unlink(__DIR__ . '/fixtures/changes-injected-extracted.docx');

@@ -5,6 +5,8 @@ namespace Label305\DocxExtractor\Decorated\Extractors;
 use DOMElement;
 use DOMNode;
 use DOMText;
+use Label305\DocxExtractor\Decorated\Deletion;
+use Label305\DocxExtractor\Decorated\Insertion;
 use Label305\DocxExtractor\Decorated\Sentence;
 use Label305\DocxExtractor\Decorated\Style;
 
@@ -27,11 +29,29 @@ class RNodeSentenceExtractor implements SentenceExtractor
         $subscript = false;
         $text = null;
         $style = null;
+        $insertion = null;
+        $deletion = null;
+        $rsidR = null;
+        $rsidDel = null;
         $result = [];
+
+        if ($DOMElement->nodeName === "w:ins") {
+            $insertion = new Insertion(
+                $DOMElement->getAttribute('w:id'),
+                $DOMElement->getAttribute('w:author'),
+                $DOMElement->getAttribute('w:date')
+            );
+        } elseif ($DOMElement->nodeName === "w:del") {
+            $deletion = new Deletion(
+                $DOMElement->getAttribute('w:id'),
+                $DOMElement->getAttribute('w:author'),
+                $DOMElement->getAttribute('w:date')
+            );
+        }
 
         foreach ($DOMElement->childNodes as $rChild) {
             $this->parseChildNode($rChild, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                $superscript, $subscript, $text, $style
+                $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel
             );
         }
 
@@ -51,6 +71,10 @@ class RNodeSentenceExtractor implements SentenceExtractor
      * @param bool $subscript
      * @param string|null $text
      * @param Style|null $style
+     * @param Insertion|null $insertion
+     * @param Deletion|null $deletion
+     * @param string|null $rsidR
+     * @param string|null $rsidDel
      */
     private function parseChildNode(
         $rChild,
@@ -64,16 +88,23 @@ class RNodeSentenceExtractor implements SentenceExtractor
         &$superscript,
         &$subscript,
         &$text,
-        &$style
+        &$style,
+        &$insertion,
+        &$deletion,
+        &$rsidR,
+        &$rsidDel
     ) {
         if ($rChild instanceof DOMElement) {
             switch ($rChild->nodeName) {
                 case "w:p" :
                 case "w:r" :
                 case "w:smartTag" :
+                    $rsidR =  $rChild->getAttribute('w:rsidR');
+                    $rsidDel =  $rChild->getAttribute('w:rsidDel');
+
                     foreach ($rChild->childNodes as $propertyNode) {
                         $this->parseChildNode($propertyNode, $result, $webHidden, $bold, $italic, $underline, $brCount, $highLight,
-                            $superscript, $subscript, $text, $style);
+                            $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel);
                     }
                     break;
 
@@ -117,7 +148,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
 
         if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
 
-            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript, $style);
+            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel);
 
             // Reset
             $brCount = 0;
