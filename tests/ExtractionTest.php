@@ -608,7 +608,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals(" the expertise ", $otherMapping[0][6]->text);
         $this->assertEquals("ABS", $otherMapping[0][7]->text);
         $this->assertEquals("wants to bet;", $otherMapping[0][9]->text);
-        $this->assertEquals("This is the ", $otherMapping[1][4]->text);
+        $this->assertEquals("This is the ", $otherMapping[1][3]->text);
 
         unlink(__DIR__ . '/fixtures/changes-extracted.docx');
         unlink(__DIR__ . '/fixtures/changes-injected-extracted.docx');

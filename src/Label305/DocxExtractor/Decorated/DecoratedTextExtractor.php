@@ -89,6 +89,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 if ($DOMNodeChild instanceof DOMElement && in_array($DOMNodeChild->nodeName, [
                     "w:r",
                     "w:ins",
+                    "w:del",
                     "w:hyperlink",
                     "w:smartTag",
                 ])) {

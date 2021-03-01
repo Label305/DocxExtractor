@@ -157,6 +157,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
 
             // Reset
             $brCount = 0;
+            $tabCount = 0;
             $style = null;
             $text = null;
         }
