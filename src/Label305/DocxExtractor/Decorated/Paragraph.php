@@ -80,31 +80,31 @@ class Paragraph extends ArrayObject
         } else {
             if ($node->childNodes !== null) {
 
-                if ($node->nodeName == 'b' || $node->nodeName == 'strong') {
+                if ($node->nodeName === 'b' || $node->nodeName === 'strong') {
                     $bold = true;
                 }
-                if ($node->nodeName == 'i' || $node->nodeName == 'em') {
+                if ($node->nodeName === 'i' || $node->nodeName === 'em') {
                     $italic = true;
                 }
-                if ($node->nodeName == 'u') {
+                if ($node->nodeName === 'u') {
                     $underline = true;
                 }
-                if ($node->nodeName == 'mark') {
+                if ($node->nodeName === 'mark') {
                     $highlight = true;
                 }
-                if ($node->nodeName == 'sup') {
+                if ($node->nodeName === 'sup') {
                     $superscript = true;
                 }
-                if ($node->nodeName == 'sub') {
+                if ($node->nodeName === 'sub') {
                     $subscript = true;
                 }
-                if ($node->nodeName == 'font') {
+                if ($node->nodeName === 'font') {
                     $hasStyle = true;
                 }
 
                 foreach ($node->childNodes as $child) {
 
-                    if ($child->nodeName == 'br') {
+                    if ($child->nodeName === 'br') {
                         $br++;
                     } else {
                         $this->fillWithHTMLDom($child, $originalParagraph, $br, $bold, $italic, $underline, $highlight, $superscript, $subscript, $hasStyle);

@@ -36,16 +36,16 @@ class Deletion {
      */
     public function toDocxXML()
     {
+        $properties = [
+            'id',
+            'author',
+            'date'
+        ];
         $value = '<w:del';
-
-        if ($this->id !== null) {
-            $value .= ' w:id="' . $this->id . '" ';
-        }
-        if ($this->author !== null) {
-            $value .= ' w:author="' . $this->author . '" ';
-        }
-        if ($this->date !== null) {
-            $value .= ' w:date="' . $this->date . '" ';
+        foreach ($properties as $property) {
+            if ($this->$property !== null) {
+                $value .= ' w:' . $property . '="' . $this->$property . '" ';
+            }
         }
         $value .= ' xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">';
 
