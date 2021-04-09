@@ -59,14 +59,14 @@ class Style {
      */
     public function isEmpty()
     {
-        return ($this->rFonts === null || $this->rFonts === "" ) &&
-            ($this->color === null || $this->color === "" ) &&
-            ($this->lang === null || $this->lang === "" ) &&
-            ($this->sz === null || $this->sz === "" ) &&
-            ($this->szCs === null || $this->szCs === "" ) &&
-            ($this->position === null || $this->position === "" ) &&
-            ($this->spacing === null || $this->spacing === "" ) &&
-            ($this->highlightColor === null || $this->highlightColor === "");
+        return empty($this->rFonts) &&
+            empty($this->color) &&
+            empty($this->lang) &&
+            empty($this->sz) &&
+            empty($this->szCs) &&
+            empty($this->position) &&
+            empty($this->spacing) &&
+            empty($this->highlightColor);
     }
 
     /**
@@ -76,27 +76,23 @@ class Style {
      */
     public function toDocxXML()
     {
+        $properties = [
+            'color',
+            'lang',
+            'sz',
+            'szCs',
+            'position',
+            'spacing',
+        ];
+
         $value = '';
         if ($this->rFonts !== null) {
             $value .= '<w:rFonts w:ascii="' . $this->rFonts . '" w:hAnsi="' . $this->rFonts . '" w:cs="' . $this->rFonts . '"/>';
         }
-        if ($this->color !== null) {
-            $value .= '<w:color w:val="' . $this->color . '"/>';
-        }
-        if ($this->lang !== null) {
-            $value .= '<w:lang w:val="' . $this->lang . '"/>';
-        }
-        if ($this->sz !== null) {
-            $value .= '<w:sz w:val="' . $this->sz . '"/>';
-        }
-        if ($this->szCs !== null) {
-            $value .= '<w:szCs w:val="' . $this->szCs . '"/>';
-        }
-        if ($this->position !== null) {
-            $value .= '<w:position w:val="' . $this->position . '"/>';
-        }
-        if ($this->spacing !== null) {
-            $value .= '<w:spacing w:val="' . $this->spacing . '"/>';
+        foreach ($properties as $property) {
+            if ($this->$property !== null) {
+                $value .= '<w:' . $property . ' w:val="' . $this->$property . '"/>';
+            }
         }
         return $value;
     }

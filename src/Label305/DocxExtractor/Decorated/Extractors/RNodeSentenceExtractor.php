@@ -102,8 +102,12 @@ class RNodeSentenceExtractor implements SentenceExtractor
                 case "w:r" :
                 case "w:smartTag" :
 
-                    $rsidR = $rChild->getAttribute('w:rsidR');
-                    $rsidDel = $rChild->getAttribute('w:rsidDel');
+                    if (!empty($rChild->getAttribute('w:rsidR'))) {
+                        $rsidR = $rChild->getAttribute('w:rsidR');
+                    }
+                    if (!empty($rChild->getAttribute('w:rsidDel'))) {
+                        $rsidDel = $rChild->getAttribute('w:rsidDel');
+                    }
 
                     foreach ($rChild->childNodes as $propertyNode) {
                         $this->parseChildNode($propertyNode,  $result, $webHidden, $bold, $italic,
