@@ -152,14 +152,16 @@ class RNodeSentenceExtractor implements SentenceExtractor
         }
 
         if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
-
             $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $tabCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel);
 
             // Reset
             $brCount = 0;
             $tabCount = 0;
-            $style = null;
             $text = null;
+            if ($brCount !== 0 && ($text !== null && strlen($text) !== 0)) {
+                // Only reset when element contains text
+                $style = null;
+            }
         }
     }
 
