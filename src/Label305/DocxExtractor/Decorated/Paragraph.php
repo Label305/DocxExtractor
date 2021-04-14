@@ -69,7 +69,6 @@ class Paragraph extends ArrayObject
         $hasStyle = false
     ) {
         if ($node instanceof DOMText) {
-
             $originalStyle = null;
             if ($originalParagraph !== null) {
                 $originalStyle = $this->getOriginalStyle($node, $originalParagraph);
@@ -103,12 +102,13 @@ class Paragraph extends ArrayObject
                 }
 
                 foreach ($node->childNodes as $child) {
-
                     if ($child->nodeName === 'br') {
                         $br++;
                     } else {
                         $this->fillWithHTMLDom($child, $originalParagraph, $br, $bold, $italic, $underline, $highlight, $superscript, $subscript, $hasStyle);
-                        $br = 0;
+                        if(!empty($child->nodeValue)) {
+                            $br = 0;
+                        }
                     }
                 }
             }
@@ -122,6 +122,18 @@ class Paragraph extends ArrayObject
      */
     private function getOriginalStyle(DOMText $node, Paragraph $originalParagraph)
     {
+        // Find styling for corresponding node text
+        foreach ($originalParagraph as $sentence) {
+            if ($sentence->text === $node->wholeText) {
+                return $sentence->style;
+            }
+            // Naive way of search for part of the original text
+            $substr = substr(trim($node->wholeText), 0, strlen($sentence->text));
+            if (!empty($substr) && $substr === $sentence->text) {
+                return $sentence->style;
+            }
+        }
+
         $originalStyle = null;
         if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
             // Sometimes we extract a single space, but in the Paragraph the space is at the beginning of the sentence
@@ -219,7 +231,7 @@ class Paragraph extends ArrayObject
                 $closeFont = true;
                 $fontIsActive = false;
             }
-            
+
             $closeBold = false;
             if ($nextSentence === null || (!$nextSentence->bold && $boldIsActive)) {
                 $boldIsActive = false;
