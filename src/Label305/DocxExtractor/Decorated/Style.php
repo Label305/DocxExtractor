@@ -87,7 +87,8 @@ class Style {
 
         $value = '';
         if ($this->rFonts !== null) {
-            $value .= '<w:rFonts w:ascii="' . $this->rFonts . '" w:hAnsi="' . $this->rFonts . '" w:cs="' . $this->rFonts . '"/>';
+            $rFonts = htmlentities($this->rFonts, ENT_XML1);
+            $value .= '<w:rFonts w:ascii="' . $rFonts . '" w:hAnsi="' . $rFonts . '" w:cs="' . $rFonts . '"/>';
         }
         foreach ($properties as $property) {
             if ($this->$property !== null) {
