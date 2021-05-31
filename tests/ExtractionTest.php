@@ -423,6 +423,70 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__ . '/fixtures/textbox-injected.docx');
     }
 
+    public function testTextboxInDocumentWithDirection(){
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox.docx',
+            __DIR__ . '/fixtures/textbox-extracted.docx');
+
+        $this->assertEquals("This", $mapping[0][0]->text);
+        $this->assertEquals(" is a ", $mapping[0][1]->text);
+        $this->assertEquals("textbox", $mapping[0][2]->text);
+
+        $mapping[0][0]->text = "Dit";
+        $mapping[0][1]->text = " is een ";
+        $mapping[0][2]->text = "textbox";
+
+        $injector = new DecoratedTextInjector();
+        $injector->setDirection('rtl');
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/textbox-extracted.docx',
+            __DIR__ . '/fixtures/textbox-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox-injected.docx',
+            __DIR__ . '/fixtures/textbox-injected-extracted.docx');
+
+        $this->assertEquals("Dit", $otherMapping[0][0]->text);
+        $this->assertEquals(" is een ", $otherMapping[0][1]->text);
+        $this->assertEquals("textbox", $otherMapping[0][2]->text);
+
+        unlink(__DIR__ . '/fixtures/textbox-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-injected.docx');
+    }
+
+    public function testTextboxInDocumentWithDirectionAndExistingParagraphStyle(){
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox-right.docx',
+            __DIR__ . '/fixtures/textbox-right-extracted.docx');
+
+        $this->assertEquals("This", $mapping[0][0]->text);
+        $this->assertEquals(" is a ", $mapping[0][1]->text);
+        $this->assertEquals("textbox", $mapping[0][2]->text);
+
+        $mapping[0][0]->text = "Dit";
+        $mapping[0][1]->text = " is een ";
+        $mapping[0][2]->text = "textbox";
+
+        $injector = new DecoratedTextInjector();
+        $injector->setDirection('ltr');
+        $injector->injectMappingAndCreateNewFile($mapping, __DIR__ . '/fixtures/textbox-right-extracted.docx',
+            __DIR__ . '/fixtures/textbox-right-injected.docx');
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/textbox-right-injected.docx',
+            __DIR__ . '/fixtures/textbox-right-injected-extracted.docx');
+
+        $this->assertEquals("Dit", $otherMapping[0][0]->text);
+        $this->assertEquals(" is een ", $otherMapping[0][1]->text);
+        $this->assertEquals("textbox", $otherMapping[0][2]->text);
+
+        unlink(__DIR__ . '/fixtures/textbox-right-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-right-injected-extracted.docx');
+        unlink(__DIR__ . '/fixtures/textbox-right-injected.docx');
+    }
+
     public function testGetTableOfContentsInDocument() {
 
         $extractor = new DecoratedTextExtractor();

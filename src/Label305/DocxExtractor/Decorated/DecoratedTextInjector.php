@@ -12,6 +12,22 @@ use Label305\DocxExtractor\Injector;
 class DecoratedTextInjector extends DocxHandler implements Injector {
 
     /**
+     * @var string|null
+     */
+    private $direction;
+
+    /**
+     * @param string|null $direction
+     * @throws \Exception
+     */
+    public function setDirection($direction) {
+        if (!in_array($direction, ['ltr', 'rtl'])) {
+            throw new \Exception('Direction should be ltr or rtl');
+        }
+        $this->direction = $direction;
+    }
+
+    /**
      * @param $mapping
      * @param $fileToInjectLocationPath
      * @param $saveLocationPath
@@ -42,6 +58,12 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
                 $key = trim($results[0], '%');
 
                 $parent = $node->parentNode;
+
+                if ($this->direction !== null) {
+                    $styleNode = $this->addOrFindParagraphStyleNode($parent);
+                    $this->addParagraphDirection($styleNode);
+                }
+
                 foreach ($mapping[$key] as $sentence) {
                     $fragment = $parent->ownerDocument->createDocumentFragment();
                     $fragment->appendXML($sentence->toDocxXML());
@@ -55,6 +77,43 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
             foreach ($node->childNodes as $child) {
                 $this->assignMappedValues($child, $mapping);
             }
+        }
+    }
+
+    private function addOrFindParagraphStyleNode(DOMNode $parent)
+    {
+        $styleNode = null;
+        foreach ($parent->childNodes as $childNode) {
+            if ($childNode->nodeName === 'w:pPr') {
+                return $childNode;
+            }
+        }
+        if ($styleNode === null) {
+            $fragment = $parent->ownerDocument->createDocumentFragment();
+            $fragment->appendXML('<w:pPr></w:pPr>');
+            $parent->insertBefore($fragment, $parent);
+            return $this->addOrFindParagraphStyleNode($parent);
+        }
+        return $styleNode;
+    }
+
+    private function addParagraphDirection(DOMNode $parent)
+    {
+        $fragment = $parent->ownerDocument->createDocumentFragment();
+        $direction = null;
+        if ($this->direction === 'ltr') {
+            $direction = 'start';
+        } elseif ($this->direction === 'rtl') {
+            $direction = 'end';
+        }
+        if ($direction !== null) {
+            foreach ($parent->childNodes as $childNode) {
+                if ($childNode->nodeName === 'w:jc') {
+                    $parent->removeChild($childNode);
+                }
+            }
+            $fragment->appendXML('<w:jc w:val="' . $direction . '" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" />');
+            $parent->appendChild($fragment);
         }
     }
 }
