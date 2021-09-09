@@ -90,8 +90,8 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
         }
         if ($styleNode === null) {
             $fragment = $parent->ownerDocument->createDocumentFragment();
-            $fragment->appendXML('<w:pPr></w:pPr>');
-            $parent->insertBefore($fragment, $parent);
+            $fragment->appendXML('<w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"> </w:pPr>');
+            $parent->insertBefore($fragment);
             return $this->addOrFindParagraphStyleNode($parent);
         }
         return $styleNode;
