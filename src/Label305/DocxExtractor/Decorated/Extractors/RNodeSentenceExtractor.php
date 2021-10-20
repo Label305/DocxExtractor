@@ -6,6 +6,7 @@ use DOMElement;
 use DOMNode;
 use DOMText;
 use Label305\DocxExtractor\Decorated\Deletion;
+use Label305\DocxExtractor\Decorated\Hyperlink;
 use Label305\DocxExtractor\Decorated\Insertion;
 use Label305\DocxExtractor\Decorated\Sentence;
 use Label305\DocxExtractor\Decorated\Style;
@@ -35,24 +36,37 @@ class RNodeSentenceExtractor implements SentenceExtractor
         $rsidR = null;
         $rsidDel = null;
         $result = [];
+        $hyperlink = null;
 
-        if ($DOMElement->nodeName === "w:ins") {
-            $insertion = new Insertion(
-                $DOMElement->getAttribute('w:id'),
-                $DOMElement->getAttribute('w:author'),
-                $DOMElement->getAttribute('w:date')
-            );
-        } elseif ($DOMElement->nodeName === "w:del") {
-            $deletion = new Deletion(
-                $DOMElement->getAttribute('w:id'),
-                $DOMElement->getAttribute('w:author'),
-                $DOMElement->getAttribute('w:date')
-            );
+        switch ($DOMElement->nodeName) {
+            case "w:ins":
+                $insertion = new Insertion(
+                    $DOMElement->getAttribute('w:id'),
+                    $DOMElement->getAttribute('w:author'),
+                    $DOMElement->getAttribute('w:date')
+                );
+                break;
+            case "w:del":
+                $deletion = new Deletion(
+                    $DOMElement->getAttribute('w:id'),
+                    $DOMElement->getAttribute('w:author'),
+                    $DOMElement->getAttribute('w:date')
+                );
+                break;
+            case "w:hyperlink" :
+                $hyperlink = new HyperLink(
+                    $DOMElement->getAttribute('r:id'),
+                    $DOMElement->getAttribute('w:tgtFrame'),
+                    $DOMElement->getAttribute('w:history')
+                );
+                break;
+            default:
+                break;
         }
 
         foreach ($DOMElement->childNodes as $rChild) {
             $this->parseChildNode($rChild, $result, $webHidden, $bold, $italic, $underline, $brCount, $tabCount, $highLight,
-                $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel
+                $superscript, $subscript, $text, $style, $insertion, $deletion, $rsidR, $rsidDel, $hyperlink
             );
         }
 
@@ -74,6 +88,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
      * @param Style|null $style
      * @param Insertion|null $insertion
      * @param Deletion|null $deletion
+     * @param Hyperlink|null $hyperlink
      * @param string|null $rsidR
      * @param string|null $rsidDel
      */
@@ -94,7 +109,8 @@ class RNodeSentenceExtractor implements SentenceExtractor
         &$insertion,
         &$deletion,
         &$rsidR,
-        &$rsidDel
+        &$rsidDel,
+        &$hyperlink
     ) {
         if ($rChild instanceof DOMElement) {
             switch ($rChild->nodeName) {
@@ -113,12 +129,13 @@ class RNodeSentenceExtractor implements SentenceExtractor
                         $this->parseChildNode($propertyNode,  $result, $webHidden, $bold, $italic,
                             $underline, $brCount, $tabCount, $highLight, $superscript,
                             $subscript, $text, $style, $insertion, $deletion, $rsidR,
-                            $rsidDel);
+                            $rsidDel, $hyperlink);
                     }
                     break;
 
                 case "w:rPr" :
                     $rFonts = null;
+                    $rStyle = null;
                     $color = null;
                     $lang = null;
                     $sz = null;
@@ -130,13 +147,13 @@ class RNodeSentenceExtractor implements SentenceExtractor
 
                     foreach ($rChild->childNodes as $propertyNode) {
                         if ($propertyNode instanceof DOMElement) {
-                            $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $highLightColor, $hasStyle);
+                            $this->parseStyle($propertyNode,$rFonts,$color,$lang,$sz,$szCs, $position, $spacing, $highLightColor, $hasStyle, $rStyle);
                             $this->parseFormatting($propertyNode,$webHidden,$bold,$italic,$underline,$highLight,$superscript,$subscript);
                         }
                     }
 
                     if ($hasStyle) {
-                        $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highLightColor);
+                        $style = new Style($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highLightColor, $rStyle);
                     }
                     break;
 
@@ -156,7 +173,7 @@ class RNodeSentenceExtractor implements SentenceExtractor
         }
 
         if (!$webHidden && ($brCount !== 0 || ($text !== null && strlen($text) !== 0))) {
-            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $tabCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel);
+            $result[] = new Sentence($text, $bold, $italic, $underline, $brCount, $tabCount, $highLight, $superscript, $subscript, $style, $insertion, $deletion, $rsidR, $rsidDel, $hyperlink);
 
             // Reset
             $brCount = 0;
@@ -219,9 +236,10 @@ class RNodeSentenceExtractor implements SentenceExtractor
      * @param string|null $position
      * @param string|null $spacing
      * @param string|null $highLightColor
+     * @param string|null $rStyle
      * @param bool $hasStyle
      */
-    protected function parseStyle(DOMElement $propertyNode, &$rFonts, &$color, &$lang, &$sz, &$szCs, &$position, &$spacing, &$highLightColor, &$hasStyle)
+    protected function parseStyle(DOMElement $propertyNode, &$rFonts, &$color, &$lang, &$sz, &$szCs, &$position, &$spacing, &$highLightColor, &$hasStyle, &$rStyle)
     {
         if ($propertyNode->nodeName == "w:rFonts") {
             $rFonts = $propertyNode->getAttribute('w:ascii');
@@ -249,6 +267,9 @@ class RNodeSentenceExtractor implements SentenceExtractor
             $hasStyle = true;
         } elseif ($propertyNode->nodeName == "w:highlight") {
             $highLightColor = $propertyNode->getAttribute('w:val');
+            $hasStyle = true;
+        } elseif ($propertyNode->nodeName == "w:rStyle") {
+            $rStyle = $propertyNode->getAttribute('w:val');
             $hasStyle = true;
         }
     }

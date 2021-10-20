@@ -43,7 +43,12 @@ class Style {
      */
     public $highlightColor;
 
-    function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highlightColor) {
+    /**
+     * @var string|null
+     */
+    public $rStyle;
+
+    function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highlightColor, $rStyle) {
         $this->rFonts = $rFonts;
         $this->color = $color;
         $this->lang = $lang;
@@ -52,6 +57,7 @@ class Style {
         $this->position = $position;
         $this->spacing = $spacing;
         $this->highlightColor = $highlightColor;
+        $this->rStyle = $rStyle;
     }
 
     /**
@@ -66,7 +72,8 @@ class Style {
             empty($this->szCs) &&
             empty($this->position) &&
             empty($this->spacing) &&
-            empty($this->highlightColor);
+            empty($this->highlightColor) &&
+            empty($this->rStyle);
     }
 
     /**
@@ -89,6 +96,10 @@ class Style {
         if ($this->rFonts !== null) {
             $rFonts = htmlentities($this->rFonts, ENT_XML1);
             $value .= '<w:rFonts w:ascii="' . $rFonts . '" w:hAnsi="' . $rFonts . '" w:cs="' . $rFonts . '"/>';
+        }
+        if ($this->rStyle !== null) {
+            $rStyle = htmlentities($this->rStyle, ENT_XML1);
+            $value .= '<w:rStyle w:val="' . $rStyle . '"/>';
         }
         foreach ($properties as $property) {
             if ($this->$property !== null) {

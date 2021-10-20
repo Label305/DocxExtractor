@@ -79,6 +79,10 @@ class Sentence {
      * @var string|null
      */
     public $rsidDel;
+    /**
+     * @var null
+     */
+    private $hyperLink;
 
 
     function __construct(
@@ -95,7 +99,8 @@ class Sentence {
         $insertion = null,
         $deletion = null,
         $rsidR = null,
-        $rsidDel = null
+        $rsidDel = null,
+        $hyperLink = null
     ) {
         $this->text = $text;
         $this->bold = $bold;
@@ -111,6 +116,7 @@ class Sentence {
         $this->deletion = $deletion;
         $this->rsidR = $rsidR;
         $this->rsidDel = $rsidDel;
+        $this->hyperLink = $hyperLink;
     }
 
     /**
@@ -121,6 +127,9 @@ class Sentence {
     public function toDocxXML()
     {
         $value = '';
+        if($this->hyperLink){
+            $value .= $this->hyperLink->toDocxXML();
+        }
         if ($this->insertion) {
             $value .= $this->insertion->toDocxXML();
         }
@@ -179,6 +188,9 @@ class Sentence {
         }
         if ($this->insertion !== null) {
             $value .= '</w:ins>';
+        }
+        if($this->hyperLink !== null) {
+            $value .= '</w:hyperlink>';
         }
 
         return $value;
