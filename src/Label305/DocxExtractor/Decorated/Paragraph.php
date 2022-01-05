@@ -69,11 +69,13 @@ class Paragraph extends ArrayObject
         $hasStyle = false
     ) {
         if ($node instanceof DOMText) {
-            $originalStyle = null;
-            if ($originalParagraph !== null) {
-                $originalStyle = $this->getOriginalStyle($node, $originalParagraph);
+            $sentence = $originalParagraph !== null ? $this->getOriginalSentence($node, $originalParagraph) : null;
+            if ($sentence === null) {
+                $sentence = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, 0, $highlight, $superscript, $subscript, null);
             }
-            $this[] = new Sentence($node->nodeValue, $bold, $italic, $underline, $br, 0, $highlight, $superscript, $subscript, $originalStyle);
+
+            $sentence->text = $node->nodeValue;
+            $this[] = $sentence;
             $this->nextTagIdentifier++;
 
         } else {
@@ -118,23 +120,23 @@ class Paragraph extends ArrayObject
     /**
      * @param DOMText $node
      * @param Paragraph $originalParagraph
-     * @return Style|null
+     * @return Sentence|null
      */
-    private function getOriginalStyle(DOMText $node, Paragraph $originalParagraph)
+    private function getOriginalSentence(DOMText $node, Paragraph $originalParagraph)
     {
         // Find styling for corresponding node text
         foreach ($originalParagraph as $sentence) {
             if ($sentence->text === $node->wholeText) {
-                return $sentence->style;
+                return $sentence;
             }
             // Naive way of search for part of the original text
             $substr = substr(trim($node->wholeText), 0, strlen($sentence->text));
             if (!empty($substr) && $substr === $sentence->text) {
-                return $sentence->style;
+                return $sentence;
             }
         }
 
-        $originalStyle = null;
+        $originalSentence = null;
         if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
             // Sometimes we extract a single space, but in the Paragraph the space is at the beginning of the sentence
             $startsWithSpace = strlen($node->nodeValue) > strlen(ltrim($node->nodeValue));
@@ -142,14 +144,14 @@ class Paragraph extends ArrayObject
                 // When the current paragraph has no length it may be the space at the beginning
                 if (array_key_exists($this->nextTagIdentifier + 1, $originalParagraph)) {
                     // Add the next paragraph style
-                    $originalStyle = $originalParagraph[$this->nextTagIdentifier + 1]->style;
+                    $originalSentence = $originalParagraph[$this->nextTagIdentifier + 1];
                     $this->nextTagIdentifier++;
                 }
             } else {
-                $originalStyle = $originalParagraph[$this->nextTagIdentifier]->style;
+                $originalSentence = $originalParagraph[$this->nextTagIdentifier];
             }
         }
-        return $originalStyle;
+        return $originalSentence;
     }
 
     /**

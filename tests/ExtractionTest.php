@@ -114,6 +114,8 @@ class ExtractionTest extends TestCase {
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/crazy.docx', __DIR__.'/fixtures/crazy-extracted.docx');
 
+        // TODO: test injected paragraphs
+        $this->assertEquals("Haynes-Shockley experiment", $mapping[0][0]->text);
         unlink(__DIR__.'/fixtures/crazy-extracted.docx');
     }
 
@@ -147,29 +149,48 @@ class ExtractionTest extends TestCase {
 
     public function testTagMappingDecoratedExtractorWithDocumentContainingHyperlink() {
 
+        /* Given */
         $extractor = new DecoratedTextExtractor();
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/hyperlink.docx', __DIR__ . '/fixtures/hyperlink-extracted.docx');
-        $this->assertEquals("Bent u geïnteresseerd in een nieuw gebouwde ruime woning vanaf Euro ", $mapping[0][0]->text);
-        $this->assertEquals("69.000,–", $mapping[0][1]->text);
-        $this->assertEquals("? ", $mapping[0][2]->text);
-        $this->assertEquals("KLIK OP DEZE LINK EN ZIE UW NIEUW GEBOUWDE WONING.", $mapping[0][3]->text);
+        $paragraph = $mapping[0];
 
-        $mapping[0][0]->text = Paragraph::paragraphWithHTML("Are you interested in a newly built spacious house from Euro&nbsp;")->toHTML();
-        $mapping[0][1]->text = Paragraph::paragraphWithHTML("69.000,&ndash;")->toHTML();
-        $mapping[0][2]->text = "? ";
-        $mapping[0][3]->text = Paragraph::paragraphWithHTML("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.")->toHTML();
+        $this->assertEquals("Bent u geïnteresseerd in een nieuw gebouwde ruime woning vanaf Euro ", $paragraph[0]->text);
+        $this->assertEquals("69.000,–", $paragraph[1]->text);
+        $this->assertEquals("? ", $paragraph[2]->text);
+        $this->assertEquals("KLIK OP DEZE LINK EN ZIE UW NIEUW GEBOUWDE WONING.", $paragraph[3]->text);
+
+        $translations = [
+            "Are you interested in a newly built spacious house from Euro&nbsp;",
+            "69.000,&ndash;",
+            "? ",
+            "CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE."
+        ];
+
+        // map paragraph
+        $html = '';
+        foreach ($translations as $translation) {
+            $html .= "<font>" . $translation . "</font>";
+        }
+        $mapping[0] = Paragraph::paragraphWithHTML($html, $paragraph);
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlink-extracted.docx', __DIR__.'/fixtures/hyperlink-injected.docx');
 
+        /* When */
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlink-injected.docx', __DIR__.'/fixtures/hyperlink-injected-extracted.docx');
 
+        $hyperLinkSenetence = $otherMapping[0][3];
+
+        /* Then */
+        $this->assertNotNull($hyperLinkSenetence->hyperLink, 'Sentence is missing hyperlink property');
+
         $this->assertEquals("Are you interested in a newly built spacious house from Euro ", $otherMapping[0][0]->text);
-        $this->assertEquals("69.000,&ndash;", $otherMapping[0][1]->text);
+        $this->assertEquals("69.000,–", $otherMapping[0][1]->text);
         $this->assertEquals("? ", $otherMapping[0][2]->text);
         $this->assertEquals("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.", $otherMapping[0][3]->text);
+
         unlink(__DIR__.'/fixtures/hyperlink-extracted.docx');
         unlink(__DIR__.'/fixtures/hyperlink-injected-extracted.docx');
         unlink(__DIR__.'/fixtures/hyperlink-injected.docx');
@@ -219,19 +240,25 @@ class ExtractionTest extends TestCase {
 
     public function testHyperlinks2InDocument() {
 
+        /* Given */
         $extractor = new DecoratedTextExtractor();
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_2.docx', __DIR__.'/fixtures/hyperlinks_2-extracted.docx');
 
         $this->assertEquals("Meer weten over deze doopsuikerdoosjes", $mapping[9][0]->text); // This is a link
 
-        $mapping[9][0]->text = "Link vertaald";
+        $translatedLink = "Link vertaald";
+        $html = '<font>'.$translatedLink.'</font>'; // only 1 sentence in paragraph
+        $mapping[9] = Paragraph::paragraphWithHTML($html, $mapping[9]);
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlinks_2-extracted.docx', __DIR__.'/fixtures/hyperlinks_2-injected.docx');
 
+        /* When */
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/hyperlinks_2-injected.docx', __DIR__.'/fixtures/hyperlinks_2-injected-extracted.docx');
 
+        /* Then */
+        $this->assertNotNull($otherMapping[9][0]->hyperLink, 'Sentence is missing hyperlink property');
         $this->assertEquals("Link vertaald", $otherMapping[9][0]->text);
 
         unlink(__DIR__.'/fixtures/hyperlinks_2-extracted.docx');
