@@ -20,7 +20,7 @@ class Paragraph extends ArrayObject
     protected $nextTagIdentifier = 0;
 
     /**
-     * Conenience constructor for the user of the API
+     * Convenience constructor for the user of the API
      * Strings with <br> <b> <i> <u> <mark> <sub> <sup> and  <font> tags are supported.
      * @param $html string
      * @param Paragraph|null $originalParagraph
@@ -32,7 +32,7 @@ class Paragraph extends ArrayObject
         $html = str_replace("<br>", "<br />", $html);
         $html = str_replace("&nbsp;", " ", $html);
         $htmlDom = new DOMDocument;
-        @$htmlDom->loadXml(preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', html_entity_decode($html)));
+        @$htmlDom->loadXml(preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $html));
 
         $paragraph = new Paragraph();
         if ($htmlDom->documentElement !== null) {

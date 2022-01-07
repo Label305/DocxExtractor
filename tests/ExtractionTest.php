@@ -129,7 +129,7 @@ class ExtractionTest extends TestCase {
         $mapping[0][0]->text = Paragraph::paragraphWithHTML("At")->toHTML();
         $mapping[0][1]->text = Paragraph::paragraphWithHTML("The&nbsp;")->toHTML();
         $mapping[0][2]->text = "Edge";
-        $mapping[0][3]->text = Paragraph::paragraphWithHTML("&Atilde;")->toHTML();
+        $mapping[0][3]->text = Paragraph::paragraphWithHTML(html_entity_decode("&Atilde;"))->toHTML();
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/normal-extracted.docx', __DIR__.'/fixtures/normal-injected.docx');
@@ -154,25 +154,10 @@ class ExtractionTest extends TestCase {
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/hyperlink.docx', __DIR__ . '/fixtures/hyperlink-extracted.docx');
         $paragraph = $mapping[0];
-
-        $this->assertEquals("Bent u geïnteresseerd in een nieuw gebouwde ruime woning vanaf Euro ", $paragraph[0]->text);
-        $this->assertEquals("69.000,–", $paragraph[1]->text);
-        $this->assertEquals("? ", $paragraph[2]->text);
-        $this->assertEquals("KLIK OP DEZE LINK EN ZIE UW NIEUW GEBOUWDE WONING.", $paragraph[3]->text);
-
-        $translations = [
-            "Are you interested in a newly built spacious house from Euro&nbsp;",
-            "69.000,&ndash;",
-            "? ",
-            "CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE."
-        ];
-
-        // map paragraph
-        $html = '';
-        foreach ($translations as $translation) {
-            $html .= "<font>" . $translation . "</font>";
-        }
-        $mapping[0] = Paragraph::paragraphWithHTML($html, $paragraph);
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("Are you interested in a newly built spacious house from Euro&nbsp;")->toHTML();
+        $mapping[0][1]->text = Paragraph::paragraphWithHTML(html_entity_decode("69.000,&ndash;"))->toHTML();
+        $mapping[0][2]->text = "? ";
+        $mapping[0][3]->text = Paragraph::paragraphWithHTML("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.")->toHTML();
 
         $injector = new DecoratedTextInjector();
         $injector->injectMappingAndCreateNewFile($mapping, __DIR__.'/fixtures/hyperlink-extracted.docx', __DIR__.'/fixtures/hyperlink-injected.docx');
