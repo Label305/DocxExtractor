@@ -153,7 +153,6 @@ class ExtractionTest extends TestCase {
         $extractor = new DecoratedTextExtractor();
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/hyperlink.docx', __DIR__ . '/fixtures/hyperlink-extracted.docx');
-        $paragraph = $mapping[0];
         $mapping[0][0]->text = Paragraph::paragraphWithHTML("Are you interested in a newly built spacious house from Euro&nbsp;")->toHTML();
         $mapping[0][1]->text = Paragraph::paragraphWithHTML(html_entity_decode("69.000,&ndash;"))->toHTML();
         $mapping[0][2]->text = "? ";
@@ -172,7 +171,7 @@ class ExtractionTest extends TestCase {
         $this->assertNotNull($hyperLinkSenetence->hyperLink, 'Sentence is missing hyperlink property');
 
         $this->assertEquals("Are you interested in a newly built spacious house from Euro ", $otherMapping[0][0]->text);
-        $this->assertEquals("69.000,–", $otherMapping[0][1]->text);
+        $this->assertEquals("69.000,&ndash;", $otherMapping[0][1]->text);
         $this->assertEquals("? ", $otherMapping[0][2]->text);
         $this->assertEquals("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.", $otherMapping[0][3]->text);
 
@@ -744,4 +743,64 @@ class ExtractionTest extends TestCase {
         unlink($fileInjectedExtracted);
     }
 
+    /**
+     * When a file contains special characters (i.e. `<`, `>`),
+     * These should also be present in the extracted mapping
+     */
+    public function testSpecialCharactersInFile()
+    {
+        /* Given */
+        $file = __DIR__ . '/fixtures/encoding.docx';
+        $extractedFile = __DIR__ . '/fixtures/encoding-extracted.docx';
+
+        /* When */
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile($file, $extractedFile);
+
+        /* Then */
+        // text should contain encoded translations
+        $this->assertEquals("Test html encoding", $mapping[0][0]->text);
+        $this->assertEquals("0 < 3 because reasons", $mapping[1][0]->text);
+        $this->assertEquals("<font> tag is deprecated in html", $mapping[2][0]->text);
+
+        unlink($extractedFile);
+    }
+
+    /**
+     * When translations are injected with encoded characters (i.e. &lt;, &gt;),
+     * These should also be present and encoded when extracting the injected file
+     */
+    public function testEncodedCharactersInTranslation()
+    {
+        /* Given */
+        $file = __DIR__ . '/fixtures/encoding.docx';
+        $extractedFile = __DIR__ . '/fixtures/encoding-extracted.docx';
+        $injectedFile = __DIR__ . '/fixtures/encoding-injected.docx';
+        $extractedInjectedFile = __DIR__ . '/fixtures/encoding-extracted-injected.docx';
+
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile($file, $extractedFile);
+
+        // decoded (loadXml) and encoded again (toHTML)
+        $mapping[0][0]->text = Paragraph::paragraphWithHTML("Tester l'encodage html")->toHTML();
+        $mapping[1][0]->text = Paragraph::paragraphWithHTML("0 &lt; 3 car raisons")->toHTML();
+        $mapping[2][0]->text = Paragraph::paragraphWithHTML("La balise &lt;font&gt; est depreciee en html")->toHTML();
+
+        /* When */
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, $extractedFile, $injectedFile);
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile($injectedFile, $extractedInjectedFile);
+
+        /* Then */
+        // text should contain encoded translations
+        $this->assertEquals("Tester l'encodage html", $otherMapping[0][0]->text);
+        $this->assertEquals("0 &lt; 3 car raisons", $otherMapping[1][0]->text);
+        $this->assertEquals("La balise &lt;font&gt; est depreciee en html", $otherMapping[2][0]->text);
+
+        unlink($extractedFile);
+        unlink($injectedFile);
+        unlink($extractedInjectedFile);
+    }
 }
