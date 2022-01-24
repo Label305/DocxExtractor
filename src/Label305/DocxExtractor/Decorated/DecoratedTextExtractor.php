@@ -47,18 +47,10 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     {
         $result = [];
 
-        if ($node instanceof DOMElement && $node->nodeName == "w:p") {
+        if ($node instanceof DOMElement && $node->nodeName === "w:p") {
             $this->replaceAndMapValuesForParagraph($node, $result);
-
-        } elseif ($node instanceof DOMElement && $node->nodeName == "w:sdtContent") {
-            if ($node->childNodes !== null) {
-                foreach ($node->childNodes as $child) {
-                    if ($child instanceof DOMElement && $child->nodeName == "w:p") {
-                        $this->replaceAndMapValuesForParagraph($node, $result);
-                    }
-                }
-            }
-        } else {
+        }
+        else {
             if ($node->childNodes !== null) {
                 foreach ($node->childNodes as $child) {
                     $result = array_merge(
@@ -68,7 +60,6 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                 }
             }
         }
-
         return $result;
     }
 
@@ -123,7 +114,11 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
                     }
 
                 } elseif ($DOMNodeChild instanceof DOMElement) {
-                    $this->replaceAndMapValuesForParagraph($DOMNodeChild, $result);
+                    if ($DOMNodeChild->nodeName === "w:sdtContent") {
+                        $this->replaceAndMapValues($DOMNodeChild);
+                    } else {
+                        $this->replaceAndMapValuesForParagraph($DOMNodeChild, $result);
+                    }
                 }
             }
 

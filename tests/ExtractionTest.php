@@ -704,4 +704,32 @@ class ExtractionTest extends TestCase {
         unlink(__DIR__ . '/fixtures/tabs-injected.docx');
     }
 
+    public function testSdtTag()
+    {
+        /* Given */
+        $file = __DIR__ . '/fixtures/sdt.docx';
+        $fileExtracted = __DIR__ . '/fixtures/extracted-sdt.docx';
+        $fileInjected = __DIR__ . '/fixtures/injected-sdt.docx';
+        $fileInjectedExtracted = __DIR__ . '/fixtures/injected-extracted-sdt.docx';
+
+        /* When */
+        $extractor = new DecoratedTextExtractor();
+        $mapping = $extractor->extractStringsAndCreateMappingFile($file, $fileExtracted);
+
+        $injector = new DecoratedTextInjector();
+        $injector->injectMappingAndCreateNewFile($mapping, $fileExtracted, $fileInjected);
+
+        $otherExtractor = new DecoratedTextExtractor();
+        $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile($fileInjected, $fileInjectedExtracted);
+
+        /* Then */
+        $this->assertEquals("Content inside inner sdt", $otherMapping[21][0]->text);
+        $this->assertEquals("Content inside outer sdt", $otherMapping[20][0]->text);
+        $this->assertEquals("Content outside sdt", $otherMapping[31][0]->text);
+
+        unlink($fileExtracted);
+        unlink($fileInjected);
+        unlink($fileInjectedExtracted);
+    }
+
 }
