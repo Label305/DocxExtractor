@@ -79,10 +79,11 @@ class Sentence {
      * @var string|null
      */
     public $rsidDel;
+
     /**
-     * @var null
+     * @var Hyperlink|null
      */
-    private $hyperLink;
+    public $hyperLink;
 
 
     function __construct(
