@@ -57,19 +57,20 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
             if (count($results) > 0) {
                 $key = trim($results[0], '%');
 
-                $parent = $node->parentNode;
+                if (isset($mapping[$key])) {
+                    $parent = $node->parentNode;
 
-                if ($this->direction !== null) {
-                    $styleNode = $this->addOrFindParagraphStyleNode($parent);
-                    $this->addParagraphDirection($styleNode);
+                    if ($this->direction !== null) {
+                        $styleNode = $this->addOrFindParagraphStyleNode($parent);
+                        $this->addParagraphDirection($styleNode);
+                    }
+                    foreach ($mapping[$key] as $sentence) {
+                        $fragment = $parent->ownerDocument->createDocumentFragment();
+                        $fragment->appendXML($sentence->toDocxXML());
+                        $parent->insertBefore($fragment, $node);
+                    }
+                    $parent->removeChild($node);
                 }
-
-                foreach ($mapping[$key] as $sentence) {
-                    $fragment = $parent->ownerDocument->createDocumentFragment();
-                    $fragment->appendXML($sentence->toDocxXML());
-                    $parent->insertBefore($fragment, $node);
-                }
-                $parent->removeChild($node);
             }
         }
 
