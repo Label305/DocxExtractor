@@ -209,11 +209,23 @@ class RNodeSentenceExtractor implements SentenceExtractor
         if ($propertyNode->nodeName == "w:webHidden") {
             $webHidden = true;
         } elseif ($propertyNode->nodeName == "w:b") {
-            $bold = true;
+            if ($propertyNode->hasAttribute('w:val')) {
+                $bold = $propertyNode->getAttribute('w:val') == true;
+            } else {
+                $bold = true;
+            }
         } elseif ($propertyNode->nodeName == "w:i") {
-            $italic = true;
+            if ($propertyNode->hasAttribute('w:val')) {
+                $italic = $propertyNode->getAttribute('w:val') == true;
+            } else {
+                $italic = true;
+            }
         } elseif ($propertyNode->nodeName == "w:u") {
-            $underline = true;
+            if ($propertyNode->hasAttribute('w:val')) {
+                $underline = $propertyNode->getAttribute('w:val') == true;
+            } else {
+                $underline = true;
+            }
         } elseif ($propertyNode->nodeName == "w:highlight") {
             $highLight = true;
         } elseif ($propertyNode->nodeName == "w:vertAlign") {
