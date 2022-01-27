@@ -210,19 +210,19 @@ class RNodeSentenceExtractor implements SentenceExtractor
             $webHidden = true;
         } elseif ($propertyNode->nodeName == "w:b") {
             if ($propertyNode->hasAttribute('w:val')) {
-                $bold = $propertyNode->getAttribute('w:val') == true;
+                $bold = in_array($propertyNode->getAttribute('w:val'), [true, "true", 1, "1"], true);
             } else {
                 $bold = true;
             }
         } elseif ($propertyNode->nodeName == "w:i") {
             if ($propertyNode->hasAttribute('w:val')) {
-                $italic = $propertyNode->getAttribute('w:val') == true;
+                $italic = in_array($propertyNode->getAttribute('w:val'), [true, "true", 1, "1"], true);
             } else {
                 $italic = true;
             }
         } elseif ($propertyNode->nodeName == "w:u") {
             if ($propertyNode->hasAttribute('w:val')) {
-                $underline = $propertyNode->getAttribute('w:val') == true;
+                $underline = in_array($propertyNode->getAttribute('w:val'), [true, "true", 1, "1"], true);
             } else {
                 $underline = true;
             }
