@@ -32,7 +32,13 @@ class Paragraph extends ArrayObject
         $html = str_replace("<br>", "<br />", $html);
         $html = str_replace("&nbsp;", " ", $html);
         $htmlDom = new DOMDocument;
-        @$htmlDom->loadXml(preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $html));
+        $htmlContent = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $html);
+        try {
+            // When loading as XML fails, try loading as HTML
+            $htmlDom->loadXML($htmlContent);
+        } catch(\Exception $e) {
+            @$htmlDom->loadHTML($htmlContent);
+        }
 
         $paragraph = new Paragraph();
         if ($htmlDom->documentElement !== null) {
