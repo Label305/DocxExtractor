@@ -8,7 +8,7 @@ interface DOMElementExtractor
 {
     /**
      * @param DOMElement $DOMElement
-     * @return DOMElement
+     * @return DOMElement|null
      */
-    public function extract(DOMElement $DOMElement);
+    public function extract(DOMElement $DOMElement): ?DOMElement;
 }

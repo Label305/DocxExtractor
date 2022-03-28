@@ -28,14 +28,14 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
     }
 
     /**
-     * @param $mapping
-     * @param $fileToInjectLocationPath
-     * @param $saveLocationPath
+     * @param Paragraph[]|array $mapping
+     * @param string $fileToInjectLocationPath
+     * @param string $saveLocationPath
      * @throws DocxFileException
      * @throws DocxParsingException
      * @return void
      */
-    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationPath, $saveLocationPath)
+    public function injectMappingAndCreateNewFile(array $mapping, string $fileToInjectLocationPath, string $saveLocationPath): void
     {
         $prepared = $this->prepareDocumentForReading($fileToInjectLocationPath);
 
@@ -46,9 +46,9 @@ class DecoratedTextInjector extends DocxHandler implements Injector {
 
     /**
      * @param DOMNode $node
-     * @param array $mapping should be a list of Paragraph objects
+     * @param Paragraph[]|array $mapping should be a list of Paragraph objects
      */
-    protected function assignMappedValues(DOMNode $node, $mapping)
+    protected function assignMappedValues(DOMNode $node, array $mapping)
     {
         if ($node instanceof DOMText) {
             $results = [];

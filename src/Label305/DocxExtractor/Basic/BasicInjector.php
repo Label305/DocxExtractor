@@ -3,6 +3,7 @@
 use DOMDocument;
 use DOMNode;
 use DOMText;
+use Label305\DocxExtractor\Decorated\Paragraph;
 use Label305\DocxExtractor\DocxFileException;
 use Label305\DocxExtractor\DocxHandler;
 use Label305\DocxExtractor\DocxParsingException;
@@ -11,14 +12,14 @@ use Label305\DocxExtractor\Injector;
 class BasicInjector extends DocxHandler implements Injector {
 
     /**
-     * @param $mapping
-     * @param $fileToInjectLocationPath
-     * @param $saveLocationPath
+     * @param Paragraph[]|array $mapping
+     * @param string $fileToInjectLocationPath
+     * @param string $saveLocationPath
      * @throws DocxFileException
      * @throws DocxParsingException
      * @return void
      */
-    public function injectMappingAndCreateNewFile($mapping, $fileToInjectLocationPath, $saveLocationPath)
+    public function injectMappingAndCreateNewFile(array $mapping, string $fileToInjectLocationPath, string $saveLocationPath): void
     {
         $prepared = $this->prepareDocumentForReading($fileToInjectLocationPath);
 
@@ -31,7 +32,7 @@ class BasicInjector extends DocxHandler implements Injector {
      * @param DOMNode $node
      * @param $mapping
      */
-    protected function assignMappedValues(DOMNode $node, $mapping)
+    protected function assignMappedValues(DOMNode $node, $mapping): void
     {
         if ($node instanceof DOMText) {
             $results = [];

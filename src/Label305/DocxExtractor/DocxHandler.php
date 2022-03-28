@@ -26,7 +26,7 @@ abstract class DocxHandler {
     /**
      * @return string
      */
-    public function getTemporaryDirectory()
+    public function getTemporaryDirectory(): string
     {
         return $this->temporaryDirectory;
     }
@@ -35,7 +35,7 @@ abstract class DocxHandler {
      * @param string $temporaryDirectory
      * @return $this
      */
-    public function setTemporaryDirectory($temporaryDirectory)
+    public function setTemporaryDirectory(string $temporaryDirectory)
     {
         $this->temporaryDirectory = $temporaryDirectory;
         return $this;
@@ -43,13 +43,13 @@ abstract class DocxHandler {
 
     /**
      * Extract file
-     * @param $filePath
+     * @param string $filePath
      * @throws DocxFileException
      * @throws DocxParsingException
      * @returns array With "document" key, "dom" and "archive" key both are paths. "document" points to the document.xml
      * and "archive" points to the root of the archive. "dom" is the DOMDocument object for the document.xml.
      */
-    protected function prepareDocumentForReading($filePath)
+    protected function prepareDocumentForReading(string $filePath): array
     {
         //Make sure we have a complete and correct path
         $filePath = realpath($filePath) ?: $filePath;
@@ -87,12 +87,12 @@ abstract class DocxHandler {
     }
 
     /**
-     * @param $dom
-     * @param $archiveLocation
-     * @param $saveLocation
+     * @param DOMDocument $dom
+     * @param string $archiveLocation
+     * @param string $saveLocation
      * @throws DocxFileException
      */
-    protected function saveDocument($dom, $archiveLocation, $saveLocation)
+    protected function saveDocument(DOMDocument $dom, string $archiveLocation, string $saveLocation)
     {
         if(!file_exists($archiveLocation)) {
             throw new DocxFileException( 'Archive should exist: '. $archiveLocation );
@@ -142,19 +142,19 @@ abstract class DocxHandler {
     /**
      * Helper to remove tmp dir
      *
-     * @param $dir
+     * @param string $dir
      * @return bool
      */
-    protected function rmdirRecursive($dir)
+    protected function rmdirRecursive(string $dir): bool
     {
         $files = array_diff(scandir($dir), array('.', '..'));
         foreach($files as $file) {
-            (is_dir("$dir/$file")) ? rmdirRecursive("$dir/$file") : unlink("$dir/$file");
+            (is_dir("$dir/$file")) ? $this->rmdirRecursive("$dir/$file") : unlink("$dir/$file");
         }
         return rmdir($dir);
     }
 
-    private function findDocumentXml($archiveLocation)
+    private function findDocumentXml(string $archiveLocation): ?string
     {
         // Sometimes Word creates another document.xml.
         $possibleFileNames = ['document.xml'];
