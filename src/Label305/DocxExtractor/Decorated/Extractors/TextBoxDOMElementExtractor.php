@@ -9,9 +9,9 @@ class TextBoxDOMElementExtractor implements DOMElementExtractor
     /**
      * @param DOMElement $DOMElement
      * The result is the array which contains te sentences
-     * @return DOMElement
+     * @return DOMElement|null
      */
-    public function extract(DOMElement $DOMElement)
+    public function extract(DOMElement $DOMElement): ?DOMElement
     {
         if ($DOMElement->nodeName == "mc:AlternateContent") {
             foreach ($DOMElement->childNodes as $childChildNode) {
@@ -21,5 +21,6 @@ class TextBoxDOMElementExtractor implements DOMElementExtractor
                 }
             }
         }
+        return null;
     }
 }

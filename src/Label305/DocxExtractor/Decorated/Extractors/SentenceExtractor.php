@@ -12,5 +12,5 @@ interface SentenceExtractor
      * The result is the array which contains te sentences
      * @return Sentence[]
      */
-    public function extract(DOMElement $DOMElement);
+    public function extract(DOMElement $DOMElement): array;
 }

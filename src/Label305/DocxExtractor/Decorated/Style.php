@@ -48,7 +48,17 @@ class Style {
      */
     public $rStyle;
 
-    function __construct($rFonts, $color, $lang, $sz, $szCs, $position, $spacing, $highlightColor, $rStyle) {
+    function __construct(
+        ?string $rFonts,
+        ?string $color,
+        ?string $lang,
+        ?string $sz,
+        ?string $szCs,
+        ?string $position,
+        ?string $spacing,
+        ?string $highlightColor,
+        ?string $rStyle
+    ) {
         $this->rFonts = $rFonts;
         $this->color = $color;
         $this->lang = $lang;
@@ -63,7 +73,7 @@ class Style {
     /**
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->rFonts) &&
             empty($this->color) &&
@@ -81,7 +91,7 @@ class Style {
      *
      * @return string
      */
-    public function toDocxXML()
+    public function toDocxXML(): string
     {
         $properties = [
             'color',

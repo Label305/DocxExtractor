@@ -23,7 +23,7 @@ class Deletion {
      */
     public $date;
 
-    function __construct($id, $author, $date) {
+    function __construct(?string $id, ?string $author, ?string $date) {
         $this->id = $id;
         $this->author = $author;
         $this->date = $date;
@@ -34,7 +34,7 @@ class Deletion {
      *
      * @return string
      */
-    public function toDocxXML()
+    public function toDocxXML(): string
     {
         $properties = [
             'id',

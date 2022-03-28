@@ -4,12 +4,12 @@
 interface Extractor {
 
     /**
-     * @param $originalFilePath
-     * @param $mappingFileSaveLocationPath
+     * @param string $originalFilePath
+     * @param string $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
-     * @return Array The mapping of all the strings
+     * @return array The mapping of all the strings
      */
-    public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath);
+    public function extractStringsAndCreateMappingFile(string $originalFilePath, string $mappingFileSaveLocationPath): array;
 
 }

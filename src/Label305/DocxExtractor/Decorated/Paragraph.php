@@ -26,7 +26,7 @@ class Paragraph extends ArrayObject
      * @param Paragraph|null $originalParagraph
      * @return Paragraph
      */
-    public static function paragraphWithHTML($html, Paragraph $originalParagraph = null)
+    public static function paragraphWithHTML($html, Paragraph $originalParagraph = null): Paragraph
     {
         $html = "<html>" . strip_tags($html, '<br /><br><b><strong><em><i><u><mark><sub><sup><font>') . "</html>";
         $html = str_replace("<br>", "<br />", $html);
@@ -128,7 +128,7 @@ class Paragraph extends ArrayObject
      * @param Paragraph $originalParagraph
      * @return Sentence|null
      */
-    private function getOriginalSentence(DOMText $node, Paragraph $originalParagraph)
+    private function getOriginalSentence(DOMText $node, Paragraph $originalParagraph): ?Sentence
     {
         // Find styling for corresponding node text
         foreach ($originalParagraph as $sentence) {
@@ -143,7 +143,7 @@ class Paragraph extends ArrayObject
         }
 
         $originalSentence = null;
-        if (array_key_exists($this->nextTagIdentifier, $originalParagraph)) {
+        if (array_key_exists($this->nextTagIdentifier, $originalParagraph->getArrayCopy())) {
             // Sometimes we extract a single space, but in the Paragraph the space is at the beginning of the sentence
             $startsWithSpace = strlen($node->nodeValue) > strlen(ltrim($node->nodeValue));
             if ($startsWithSpace && strlen(ltrim($originalParagraph[$this->nextTagIdentifier]->text)) === 0) {

@@ -87,21 +87,21 @@ class Sentence {
 
 
     function __construct(
-        $text,
-        $bold = false,
-        $italic = false,
-        $underline = false,
-        $br = 0,
-        $tab = 0,
-        $highlight = false,
-        $superscript = false,
-        $subscript = false,
-        $style = null,
-        $insertion = null,
-        $deletion = null,
-        $rsidR = null,
-        $rsidDel = null,
-        $hyperLink = null
+        ?string $text,
+        ?bool $bold  = false,
+        ?bool $italic = false,
+        ?bool $underline = false,
+        ?int $br = 0,
+        ?int $tab = 0,
+        ?bool $highlight = false,
+        ?bool $superscript = false,
+        ?bool $subscript = false,
+        ?Style $style = null,
+        ?Insertion $insertion = null,
+        ?Deletion $deletion = null,
+        ?string $rsidR = null,
+        ?string $rsidDel = null,
+        ?Hyperlink $hyperLink = null
     ) {
         $this->text = $text;
         $this->bold = $bold;
@@ -125,7 +125,7 @@ class Sentence {
      *
      * @return string
      */
-    public function toDocxXML()
+    public function toDocxXML(): string
     {
         $value = '';
         if($this->hyperLink){
@@ -220,21 +220,21 @@ class Sentence {
      * @return string HTML string
      */
     public function toHTML(
-        $firstWrappedInBold = true,
-        $firstWrappedInItalic = true,
-        $firstWrappedInUnderline = true,
-        $firstWrappedInHighlight = true,
-        $firstWrappedInSuperscript = true,
-        $firstWrappedInSubscript = true,
-        $firstWrappedInFont = true,
-        $lastWrappedInBold = true,
-        $lastWrappedInItalic = true,
-        $lastWrappedInUnderline = true,
-        $lastWrappedInHighlight = true,
-        $lastWrappedInSuperscript = true,
-        $lastWrappedInSubscript = true,
-        $lastWrappedInFont = true
-    ) {
+        bool $firstWrappedInBold = true,
+        bool $firstWrappedInItalic = true,
+        bool $firstWrappedInUnderline = true,
+        bool $firstWrappedInHighlight = true,
+        bool $firstWrappedInSuperscript = true,
+        bool $firstWrappedInSubscript = true,
+        bool $firstWrappedInFont = true,
+        bool $lastWrappedInBold = true,
+        bool $lastWrappedInItalic = true,
+        bool $lastWrappedInUnderline = true,
+        bool $lastWrappedInHighlight = true,
+        bool $lastWrappedInSuperscript = true,
+        bool $lastWrappedInSubscript = true,
+        bool $lastWrappedInFont = true
+    ): string {
         $value = '';
 
         for ($i = 0; $i < $this->br; $i++) {

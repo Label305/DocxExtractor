@@ -29,7 +29,7 @@ class Hyperlink
      * @param string|null $tgtFrame
      * @param string|null $history
      */
-    public function __construct($id, $tgtFrame, $history)
+    public function __construct(?string $id, ?string $tgtFrame, ?string $history)
     {
         $this->id = $id;
         $this->tgtFrame = $tgtFrame;
@@ -41,7 +41,7 @@ class Hyperlink
      *
      * @return string
      */
-    public function toDocxXML()
+    public function toDocxXML(): string
     {
         $properties = [
             'tgtFrame',

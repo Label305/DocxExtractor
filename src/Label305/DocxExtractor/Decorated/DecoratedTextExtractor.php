@@ -20,13 +20,14 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
     protected $nextTagIdentifier;
 
     /**
-     * @param $originalFilePath
-     * @param $mappingFileSaveLocationPath
+     * @param string $originalFilePath
+     * @param string $mappingFileSaveLocationPath
      * @throws DocxParsingException
      * @throws DocxFileException
-     * @return array The mapping of all the strings
+     * The result is the mapping of all the strings
+     * @return Paragraph[]|array
      */
-    public function extractStringsAndCreateMappingFile($originalFilePath, $mappingFileSaveLocationPath)
+    public function extractStringsAndCreateMappingFile(string $originalFilePath, string $mappingFileSaveLocationPath): array
     {
         $prepared = $this->prepareDocumentForReading($originalFilePath);
 
@@ -43,7 +44,7 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
      * @param DOMNode $node
      * @return array returns the mapping array
      */
-    protected function replaceAndMapValues(DOMNode $node)
+    protected function replaceAndMapValues(DOMNode $node): array
     {
         $result = [];
 
@@ -65,10 +66,10 @@ class DecoratedTextExtractor extends DocxHandler implements Extractor
 
     /**
      * @param DOMNode $DOMNode
-     * @param $result
+     * @param array $result
      * @return array
      */
-    protected function replaceAndMapValuesForParagraph(DOMNode $DOMNode, &$result)
+    protected function replaceAndMapValuesForParagraph(DOMNode $DOMNode, array &$result): array
     {
         if ($DOMNode->childNodes !== null) {
 
