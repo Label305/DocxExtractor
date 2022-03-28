@@ -148,7 +148,7 @@ class Paragraph extends ArrayObject
             $startsWithSpace = strlen($node->nodeValue) > strlen(ltrim($node->nodeValue));
             if ($startsWithSpace && strlen(ltrim($originalParagraph[$this->nextTagIdentifier]->text)) === 0) {
                 // When the current paragraph has no length it may be the space at the beginning
-                if (array_key_exists($this->nextTagIdentifier + 1, $originalParagraph)) {
+                if (array_key_exists($this->nextTagIdentifier + 1, $originalParagraph->getArrayCopy())) {
                     // Add the next paragraph style
                     $originalSentence = $originalParagraph[$this->nextTagIdentifier + 1];
                     $this->nextTagIdentifier++;

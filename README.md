@@ -8,9 +8,15 @@ Composer installation
 
 ```json
 "require": {
-    "label305/docx-extractor": "0.1.*"
+    "label305/docx-extractor": "0.2.*"
 }
 ```
+Requirements
+----
+- PHP 8.0
+- PHP ext-dom
+- PHP ext-zip
+- PHP ext-libxml
 
 Basic usage
 ----
