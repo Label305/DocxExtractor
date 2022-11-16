@@ -182,7 +182,7 @@ class Sentence {
             $value .= "<w:tab/>";
         }
 
-        $value .= '<w:t xml:space="preserve">' . htmlentities($this->text, ENT_XML1) . "</w:t></w:r>";
+        $value .= '<w:t xml:space="preserve">' . htmlentities($this->text ?? '', ENT_XML1) . "</w:t></w:r>";
 
         if ($this->deletion !== null) {
             $value .= '</w:del>';
@@ -263,7 +263,7 @@ class Sentence {
             $value .= "<font>";
         }
 
-        $value .= htmlentities($this->text);
+        $value .= htmlentities($this->text ?? '', ENT_XML1);
 
         if ($this->style !== null && !$this->style->isEmpty() && $lastWrappedInFont) {
             $value .= "</font>";

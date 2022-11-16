@@ -104,11 +104,11 @@ class Style {
 
         $value = '';
         if ($this->rFonts !== null) {
-            $rFonts = htmlentities($this->rFonts, ENT_XML1);
+            $rFonts = htmlentities($this->rFonts ?? '', ENT_XML1);
             $value .= '<w:rFonts w:ascii="' . $rFonts . '" w:hAnsi="' . $rFonts . '" w:cs="' . $rFonts . '"/>';
         }
         if ($this->rStyle !== null) {
-            $rStyle = htmlentities($this->rStyle, ENT_XML1);
+            $rStyle = htmlentities($this->rStyle ?? '', ENT_XML1);
             $value .= '<w:rStyle w:val="' . $rStyle . '"/>';
         }
         foreach ($properties as $property) {

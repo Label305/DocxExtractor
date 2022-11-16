@@ -140,7 +140,7 @@ class ExtractionTest extends TestCase {
         $this->assertEquals("At", $otherMapping[0][0]->text);
         $this->assertEquals("The ", $otherMapping[0][1]->text);
         $this->assertEquals("Edge", $otherMapping[0][2]->text);
-        $this->assertEquals("&Atilde;", $otherMapping[0][3]->text);
+        $this->assertEquals("Ã", $otherMapping[0][3]->text);
 
         unlink(__DIR__.'/fixtures/normal-extracted.docx');
         unlink(__DIR__.'/fixtures/normal-injected-extracted.docx');
@@ -154,7 +154,7 @@ class ExtractionTest extends TestCase {
 
         $mapping = $extractor->extractStringsAndCreateMappingFile(__DIR__ . '/fixtures/hyperlink.docx', __DIR__ . '/fixtures/hyperlink-extracted.docx');
         $mapping[0][0]->text = Paragraph::paragraphWithHTML("Are you interested in a newly built spacious house from Euro&nbsp;")->toHTML();
-        $mapping[0][1]->text = Paragraph::paragraphWithHTML(html_entity_decode("69.000,&ndash;"))->toHTML();
+        $mapping[0][1]->text = Paragraph::paragraphWithHTML("69.000,-")->toHTML();
         $mapping[0][2]->text = "? ";
         $mapping[0][3]->text = Paragraph::paragraphWithHTML("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.")->toHTML();
 
@@ -171,7 +171,7 @@ class ExtractionTest extends TestCase {
         $this->assertNotNull($hyperLinkSenetence->hyperLink, 'Sentence is missing hyperlink property');
 
         $this->assertEquals("Are you interested in a newly built spacious house from Euro ", $otherMapping[0][0]->text);
-        $this->assertEquals("69.000,&ndash;", $otherMapping[0][1]->text);
+        $this->assertEquals("69.000,-", $otherMapping[0][1]->text);
         $this->assertEquals("? ", $otherMapping[0][2]->text);
         $this->assertEquals("CLICK ON THIS LINK AND SEE YOUR NEW BUILD HOUSE.", $otherMapping[0][3]->text);
 
@@ -389,7 +389,7 @@ class ExtractionTest extends TestCase {
         $otherExtractor = new DecoratedTextExtractor();
         $otherMapping = $otherExtractor->extractStringsAndCreateMappingFile(__DIR__.'/fixtures/nested-injected.docx', __DIR__.'/fixtures/nested-injected-extracted.docx');
 
-        $this->assertEquals("Andr&eacute; van Meurs VERTAALD", $otherMapping[0][0]->text);
+        $this->assertEquals("André van Meurs VERTAALD", $otherMapping[0][0]->text);
         $this->assertEquals("Ruimtebaan 201 VERTAALD", $otherMapping[0][2]->text);
         $this->assertEquals("2728 MK Zoetermeer VERTAALD", $otherMapping[0][4]->text);
         $this->assertEquals("Ken je dat (..) VERTAALD", $otherMapping[5][0]->text);
